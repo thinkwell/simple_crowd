@@ -5,12 +5,17 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "simple_crowd"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = "Simple Atlassian Crowd client using REST and SOAP APIs where needed."
+    gem.description = %Q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.
+                         Doesn't do any fancy object mapping, etc.}
     gem.email = "paul@thestrongfamily.org"
     gem.homepage = "http://github.com/lapluviosilla/simple_crowd"
     gem.authors = ["Paul Strong"]
-    gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
+    gem.add_development_dependency "shoulda", ">= 0"
+    gem.add_development_dependency "fcoury-matchy"
+    gem.add_development_dependency "webmock"
+    gem.add_development_dependency "rr"
+    gem.add_dependency 'savon'
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
