@@ -110,5 +110,30 @@ class TestClient < Test::Unit::TestCase
 
       assert_requested :post, @service_url, :times => 2
     end
+    should "check if cache enabled" do
+      enabled = @client.is_cache_enabled?
+      is_true = enabled.class == TrueClass
+      is_false = enabled.class == FalseClass
+      (is_true || is_false).should be true
+    end
+    should "get granted authorities" do
+      granted = @client.get_granted_authorities
+      (granted.nil? || (granted.is_a?(Array) && !granted.empty? && granted[0].is_a?(String))).should be true 
+
+      assert_requested :post, @service_url, :times => 2
+    end
+    should "add/remove user from group" do
+      @client.add_user_to_group("test", "Testing").should be true
+      @client.is_group_member?("Testing", "test").should be true
+      @client.remove_user_from_group("test", "Testing").should be true
+      @client.is_group_member?("Testing", "test").should be false
+      assert_requested :post, @service_url, :times => 5
+    end
+    should "check if user is group member" do
+      @client.add_user_to_group("test", "Testing").should be true
+      @client.is_group_member?("Testing", "test").should be true
+      @client.is_group_member?("nonexistantgroup", "test").should be false
+      assert_requested :post, @service_url, :times => 4
+    end
   end
 end

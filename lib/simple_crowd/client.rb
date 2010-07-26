@@ -2,6 +2,7 @@ module SimpleCrowd
   class Client
     def initialize options = {}
       @options = SimpleCrowd.options.merge options
+      # TODO: Fix error handling
       # Errors do not contained Exception info so we'll handle the errors ourselves
       # Savon::Response.raise_errors = false
       # @client = Savon::Client.new @options[:service_url]
@@ -12,6 +13,11 @@ module SimpleCrowd
 
     def get_cookie_info
       simple_soap_call :get_cookie_info
+    end
+
+    def get_granted_authorities
+      groups = simple_soap_call :get_granted_authorities
+      groups[:string] unless groups.nil?
     end
     
     def authenticate_application(name = @options[:app_name], password = @options[:app_password])
@@ -56,8 +62,28 @@ module SimpleCrowd
       simple_soap_call :is_valid_principal_token, token, factors
     end
 
+    def is_cache_enabled?
+      simple_soap_call :is_cache_enabled
+    end
+
+    def is_group_member? group, user
+      simple_soap_call :is_group_member, group, user
+    end
+
     def find_user_by_name name
       simple_soap_call :find_principal_by_name, name
+    end
+
+    def add_user_to_group user, group
+      simple_soap_call :add_principal_to_group, user, group do |res|
+        !res.soap_fault? && res.to_hash.key?(:add_principal_to_group_response)
+      end
+    end
+
+    def remove_user_from_group user, group
+      simple_soap_call :remove_principal_from_group, user, group do |res|
+        !res.soap_fault? && res.to_hash.key?(:remove_principal_from_group_response)
+      end
     end
 
     def reset_user_password name
