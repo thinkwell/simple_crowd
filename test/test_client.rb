@@ -33,6 +33,13 @@ class TestClient < Test::Unit::TestCase
 
       assert_requested :post, @service_url, :times => 2
     end
+    should "authenticate user with validation factors" do
+      token = @client.authenticate_user "test", "test", {:test_factor => "test1234"}
+      token.should_not be nil
+      token.length.should == 24
+
+      assert_requested :post, @service_url, :times => 2
+    end
     should "create user token without password" do
       token = @client.create_user_token "test"
       token.should_not be nil
@@ -59,6 +66,14 @@ class TestClient < Test::Unit::TestCase
       invalid = @client.is_valid_user_token?(token + "void")
       invalid.should be false
       assert_requested :post, @service_url, :times => 4
+    end
+    should "validate user token with factors" do
+      token = @client.authenticate_user "test", "test", {"Random-Number" => 6375}
+      @client.is_valid_user_token?(token).should be false
+      @client.is_valid_user_token?(token, {"Random-Number" => 6375}).should be true
+      token2 = @client.authenticate_user "test", "test"
+      @client.is_valid_user_token?(token2, {"Random-Number" => 48289}).should be false
+      assert_requested :post, @service_url, :times => 6
     end
     should "invalidate user token (logout)" do
       token = @client.authenticate_user "test", "test"

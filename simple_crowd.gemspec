@@ -25,7 +25,10 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "lib/simple_crowd.rb",
+     "lib/simple_crowd/client.rb",
+     "simple_crowd.gemspec",
      "test/helper.rb",
+     "test/test_client.rb",
      "test/test_simple_crowd.rb"
   ]
   s.homepage = %q{http://github.com/lapluviosilla/simple_crowd}
