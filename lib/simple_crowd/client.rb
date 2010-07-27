@@ -19,7 +19,7 @@ module SimpleCrowd
       groups = simple_soap_call :get_granted_authorities
       groups[:string] unless groups.nil?
     end
-    
+
     def authenticate_application(name = @options[:app_name], password = @options[:app_password])
       response = client.authenticate_application! do |soap|
         prepare soap
@@ -95,6 +95,8 @@ module SimpleCrowd
     private
     
     # Simplify the duplicated soap calls across methods
+    # @param [Symbol] action the soap action to call
+    # @param data the list of args to pass to the server as "in" args (in1, in2, etc.)
     def simple_soap_call action, *data
       # Take each arg and assign it to "in" keys for SOAP call
       soap_args = data.inject({}){|hash, arg| hash[:"in#{hash.length + 1}"] = arg; hash }
