@@ -81,6 +81,35 @@
 
 
 
+  <h2>Instance Attribute Summary <small>(<a href="#" class="summary_toggle">collapse</a>)</small></h2>
+  <ul class="summary">
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#app_token-instance_method" title="#app_token (instance method)">- (Object) <strong>app_token</strong> </a>
+    
+
+    
+  </span>
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'></div></span>
+  
+</li>
+
+    
+  </ul>
+
 
   
     <h2>
@@ -94,27 +123,6 @@
   <span class="summary_signature">
     
       <a href="#add_user_to_group-instance_method" title="#add_user_to_group (instance method)">- (Object) <strong>add_user_to_group</strong>(user, group) </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'></div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#app_token-instance_method" title="#app_token (instance method)">- (Object) <strong>app_token</strong> </a>
     
 
     
@@ -461,46 +469,14 @@ A new instance of Client
   
 </div>
 
-
-  <div id="instance_method_details" class="method_details_list">
-    <h2>Instance Method Details</h2>
+  <div id="instance_attr_details" class="attr_details">
+    <h2>Instance Attribute Details</h2>
     
-    
+      
+      <span id="app_token=-instance_method"></span>
+      <span id="app_token-instance_method"></span>
       <div class="method_details first">
-  <p class="signature first" id="add_user_to_group-instance_method">
-  
-    - (<tt>Object</tt>) <strong>add_user_to_group</strong>(user, group) 
-  
-
-  
-</p><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-77
-78
-79
-80
-81</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 77</span>
-
-<span class='def def kw'>def</span> <span class='add_user_to_group identifier id'>add_user_to_group</span> <span class='user identifier id'>user</span><span class='comma token'>,</span> <span class='group identifier id'>group</span>
-  <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:add_principal_to_group</span><span class='comma token'>,</span> <span class='user identifier id'>user</span><span class='comma token'>,</span> <span class='group identifier id'>group</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='res identifier id'>res</span><span class='bitor op'>|</span>
-    <span class='notop op'>!</span><span class='res identifier id'>res</span><span class='dot token'>.</span><span class='soap_fault? fid id'>soap_fault?</span> <span class='andop op'>&amp;&amp;</span> <span class='res identifier id'>res</span><span class='dot token'>.</span><span class='to_hash identifier id'>to_hash</span><span class='dot token'>.</span><span class='key? fid id'>key?</span><span class='lparen token'>(</span><span class='symbol val'>:add_principal_to_group_response</span><span class='rparen token'>)</span>
-  <span class='end end kw'>end</span>
-<span class='end end kw'>end</span>
-</pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <p class="signature " id="app_token-instance_method">
+  <p class="signature first" id="app_token-instance_method">
   
     - (<tt>Object</tt>) <strong>app_token</strong> 
   
@@ -528,6 +504,46 @@ A new instance of Client
 </table>
 </div>
     
+  </div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+    
+    
+      <div class="method_details first">
+  <p class="signature first" id="add_user_to_group-instance_method">
+  
+    - (<tt>Object</tt>) <strong>add_user_to_group</strong>(user, group) 
+  
+
+  
+</p><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+78
+79
+80
+81
+82</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 78</span>
+
+<span class='def def kw'>def</span> <span class='add_user_to_group identifier id'>add_user_to_group</span> <span class='user identifier id'>user</span><span class='comma token'>,</span> <span class='group identifier id'>group</span>
+  <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:add_principal_to_group</span><span class='comma token'>,</span> <span class='user identifier id'>user</span><span class='comma token'>,</span> <span class='group identifier id'>group</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='res identifier id'>res</span><span class='bitor op'>|</span>
+    <span class='notop op'>!</span><span class='res identifier id'>res</span><span class='dot token'>.</span><span class='soap_fault? fid id'>soap_fault?</span> <span class='andop op'>&amp;&amp;</span> <span class='res identifier id'>res</span><span class='dot token'>.</span><span class='to_hash identifier id'>to_hash</span><span class='dot token'>.</span><span class='key? fid id'>key?</span><span class='lparen token'>(</span><span class='symbol val'>:add_principal_to_group_response</span><span class='rparen token'>)</span>
+  <span class='end end kw'>end</span>
+<span class='end end kw'>end</span>
+</pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
       <div class="method_details ">
   <p class="signature " id="authenticate_application-instance_method">
   
@@ -541,7 +557,6 @@ A new instance of Client
       <pre class="lines">
 
 
-23
 24
 25
 26
@@ -550,10 +565,11 @@ A new instance of Client
 29
 30
 31
-32</pre>
+32
+33</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 23</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 24</span>
 
 <span class='def def kw'>def</span> <span class='authenticate_application identifier id'>authenticate_application</span><span class='lparen token'>(</span><span class='name identifier id'>name</span> <span class='assign token'>=</span> <span class='@options ivar id'>@options</span><span class='lbrack token'>[</span><span class='symbol val'>:app_name</span><span class='rbrack token'>]</span><span class='comma token'>,</span> <span class='password identifier id'>password</span> <span class='assign token'>=</span> <span class='@options ivar id'>@options</span><span class='lbrack token'>[</span><span class='symbol val'>:app_password</span><span class='rbrack token'>]</span><span class='rparen token'>)</span>
   <span class='response identifier id'>response</span> <span class='assign token'>=</span> <span class='client identifier id'>client</span><span class='dot token'>.</span><span class='authenticate_application! fid id'>authenticate_application!</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='soap identifier id'>soap</span><span class='bitor op'>|</span>
@@ -614,7 +630,6 @@ user token
       <pre class="lines">
 
 
-36
 37
 38
 39
@@ -623,10 +638,11 @@ user token
 42
 43
 44
-45</pre>
+45
+46</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 36</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 37</span>
 
 <span class='def def kw'>def</span> <span class='authenticate_user identifier id'>authenticate_user</span> <span class='name identifier id'>name</span><span class='comma token'>,</span> <span class='password identifier id'>password</span><span class='comma token'>,</span> <span class='factors identifier id'>factors</span> <span class='assign token'>=</span> <span class='nil nil kw'>nil</span>
   <span class='if if kw'>if</span> <span class='factors identifier id'>factors</span>
@@ -657,12 +673,12 @@ user token
       <pre class="lines">
 
 
-47
 48
-49</pre>
+49
+50</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 47</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 48</span>
 
 <span class='def def kw'>def</span> <span class='create_user_token identifier id'>create_user_token</span> <span class='name identifier id'>name</span>
   <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:create_principal_token</span><span class='comma token'>,</span> <span class='name identifier id'>name</span><span class='comma token'>,</span> <span class='nil nil kw'>nil</span>
@@ -686,12 +702,12 @@ user token
       <pre class="lines">
 
 
-73
 74
-75</pre>
+75
+76</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 73</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 74</span>
 
 <span class='def def kw'>def</span> <span class='find_user_by_name identifier id'>find_user_by_name</span> <span class='name identifier id'>name</span>
   <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:find_principal_by_name</span><span class='comma token'>,</span> <span class='name identifier id'>name</span>
@@ -715,12 +731,12 @@ user token
       <pre class="lines">
 
 
-14
 15
-16</pre>
+16
+17</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 14</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 15</span>
 
 <span class='def def kw'>def</span> <span class='get_cookie_info identifier id'>get_cookie_info</span>
   <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:get_cookie_info</span>
@@ -744,13 +760,13 @@ user token
       <pre class="lines">
 
 
-18
 19
 20
-21</pre>
+21
+22</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 18</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 19</span>
 
 <span class='def def kw'>def</span> <span class='get_granted_authorities identifier id'>get_granted_authorities</span>
   <span class='groups identifier id'>groups</span> <span class='assign token'>=</span> <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:get_granted_authorities</span>
@@ -806,14 +822,14 @@ success (does not guarantee valid token)
       <pre class="lines">
 
 
-54
 55
 56
 57
-58</pre>
+58
+59</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 54</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 55</span>
 
 <span class='def def kw'>def</span> <span class='invalidate_user_token identifier id'>invalidate_user_token</span> <span class='token identifier id'>token</span>
   <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:invalidate_principal_token</span><span class='comma token'>,</span> <span class='token identifier id'>token</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='res identifier id'>res</span><span class='bitor op'>|</span>
@@ -860,12 +876,12 @@ success (does not guarantee valid token)
       <pre class="lines">
 
 
-65
 66
-67</pre>
+67
+68</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 65</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 66</span>
 
 <span class='def def kw'>def</span> <span class='is_cache_enabled? fid id'>is_cache_enabled?</span>
   <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:is_cache_enabled</span>
@@ -910,12 +926,12 @@ success (does not guarantee valid token)
       <pre class="lines">
 
 
-69
 70
-71</pre>
+71
+72</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 69</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 70</span>
 
 <span class='def def kw'>def</span> <span class='is_group_member? fid id'>is_group_member?</span> <span class='group identifier id'>group</span><span class='comma token'>,</span> <span class='user identifier id'>user</span>
   <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:is_group_member</span><span class='comma token'>,</span> <span class='group identifier id'>group</span><span class='comma token'>,</span> <span class='user identifier id'>user</span>
@@ -960,13 +976,13 @@ success (does not guarantee valid token)
       <pre class="lines">
 
 
-60
 61
 62
-63</pre>
+63
+64</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 60</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 61</span>
 
 <span class='def def kw'>def</span> <span class='is_valid_user_token? fid id'>is_valid_user_token?</span> <span class='token identifier id'>token</span><span class='comma token'>,</span> <span class='factors identifier id'>factors</span> <span class='assign token'>=</span> <span class='nil nil kw'>nil</span>
   <span class='factors identifier id'>factors</span> <span class='assign token'>=</span> <span class='prepare_validation_factors identifier id'>prepare_validation_factors</span><span class='lparen token'>(</span><span class='factors identifier id'>factors</span><span class='rparen token'>)</span> <span class='unless unless_mod kw'>unless</span> <span class='factors identifier id'>factors</span><span class='dot token'>.</span><span class='nil? fid id'>nil?</span>
@@ -991,14 +1007,14 @@ success (does not guarantee valid token)
       <pre class="lines">
 
 
-83
 84
 85
 86
-87</pre>
+87
+88</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 83</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 84</span>
 
 <span class='def def kw'>def</span> <span class='remove_user_from_group identifier id'>remove_user_from_group</span> <span class='user identifier id'>user</span><span class='comma token'>,</span> <span class='group identifier id'>group</span>
   <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:remove_principal_from_group</span><span class='comma token'>,</span> <span class='user identifier id'>user</span><span class='comma token'>,</span> <span class='group identifier id'>group</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='res identifier id'>res</span><span class='bitor op'>|</span>
@@ -1024,14 +1040,14 @@ success (does not guarantee valid token)
       <pre class="lines">
 
 
-89
 90
 91
 92
-93</pre>
+93
+94</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 89</span>
+      <pre class="code"><span class="info file"># File 'lib/simple_crowd/client.rb', line 90</span>
 
 <span class='def def kw'>def</span> <span class='reset_user_password identifier id'>reset_user_password</span> <span class='name identifier id'>name</span>
   <span class='simple_soap_call identifier id'>simple_soap_call</span> <span class='symbol val'>:reset_principal_credential</span><span class='comma token'>,</span> <span class='name identifier id'>name</span> <span class='do do kw'>do</span> <span class='bitor op'>|</span><span class='res identifier id'>res</span><span class='bitor op'>|</span>
@@ -1049,7 +1065,7 @@ success (does not guarantee valid token)
 </div>
     
     <div id="footer">
-  Generated on 07/27/10 13:41:14 by 
+  Generated on 07/30/10 13:29:35 by 
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool">yard</a>
   0.5.8 (ruby-1.8.7).
 </div>

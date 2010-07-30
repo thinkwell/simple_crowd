@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Paul Strong"]
-  s.date = %q{2010-07-28}
+  s.date = %q{2010-07-30}
   s.description = %q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.
                          Doesn't do any fancy object mapping, etc.}
   s.email = %q{paul@thestrongfamily.org}
