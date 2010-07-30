@@ -110,6 +110,23 @@ class TestClient < Test::Unit::TestCase
 
       assert_requested :post, @service_url, :times => 2
     end
+    should "find user by token" do
+      token = @client.authenticate_user "test", "test"
+      user = @client.find_user_by_token token
+      user.should_not be nil
+      user[:attributes][:soap_attribute].select {|v| v[:name] == "givenName"}.first[:values][:string].downcase.should == "test"
+
+      assert_requested :post, @service_url, :times => 3
+    end
+    should "find user name by token" do
+      token = @client.authenticate_user "test", "test"
+      user = @client.find_user_name_by_token token
+      user.should_not be nil
+      user.length.should > 0
+      user.downcase.should == "test"
+
+      assert_requested :post, @service_url, :times => 3
+    end
     should "check if cache enabled" do
       enabled = @client.is_cache_enabled?
       is_true = enabled.class == TrueClass

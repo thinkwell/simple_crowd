@@ -75,6 +75,15 @@ module SimpleCrowd
       simple_soap_call :find_principal_by_name, name
     end
 
+    def find_user_by_token token
+      simple_soap_call :find_principal_by_token, token
+    end
+
+    def find_user_name_by_token token
+      user = find_user_by_token token
+      user[:attributes][:soap_attribute].select {|v| v[:name] == "givenName"}.first[:values][:string]
+    end
+
     def add_user_to_group user, group
       simple_soap_call :add_principal_to_group, user, group do |res|
         !res.soap_fault? && res.to_hash.key?(:add_principal_to_group_response)
