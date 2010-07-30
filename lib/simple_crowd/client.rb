@@ -10,6 +10,7 @@ module SimpleCrowd
     def app_token
       @app_token ||= authenticate_application
     end
+    attr_writer :app_token
 
     def get_cookie_info
       simple_soap_call :get_cookie_info

@@ -9,21 +9,35 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Paul Strong"]
-  s.date = %q{2010-07-26}
+  s.date = %q{2010-07-28}
   s.description = %q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.
                          Doesn't do any fancy object mapping, etc.}
   s.email = %q{paul@thestrongfamily.org}
   s.extra_rdoc_files = [
-    "LICENSE",
-     "README.rdoc"
+    "README.rdoc"
   ]
   s.files = [
     ".document",
      ".gitignore",
-     "LICENSE",
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "doc/SimpleCrowd.html",
+     "doc/SimpleCrowd/Client.html",
+     "doc/_index.html",
+     "doc/class_list.html",
+     "doc/css/common.css",
+     "doc/css/full_list.css",
+     "doc/css/style.css",
+     "doc/file.README.html",
+     "doc/file_list.html",
+     "doc/frames.html",
+     "doc/index.html",
+     "doc/js/app.js",
+     "doc/js/full_list.js",
+     "doc/js/jquery.js",
+     "doc/method_list.html",
+     "doc/top-level-namespace.html",
      "lib/simple_crowd.rb",
      "lib/simple_crowd/client.rb",
      "simple_crowd.gemspec",

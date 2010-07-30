@@ -135,5 +135,10 @@ class TestClient < Test::Unit::TestCase
       @client.is_group_member?("nonexistantgroup", "test").should be false
       assert_requested :post, @service_url, :times => 4
     end
+    should "accept cached app token" do
+      @client.app_token = "cachedtoken"
+      @client.app_token.should == "cachedtoken"
+      assert_not_requested :post, @service_url
+    end
   end
 end
