@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{simple_crowd}
-  s.version = "0.1.3"
+  s.version = "0.1.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Paul Strong"]
-  s.date = %q{2010-07-30}
+  s.date = %q{2010-08-06}
   s.description = %q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.
                          Doesn't do any fancy object mapping, etc.}
   s.email = %q{paul@thestrongfamily.org}
@@ -40,6 +40,10 @@ Gem::Specification.new do |s|
      "doc/top-level-namespace.html",
      "lib/simple_crowd.rb",
      "lib/simple_crowd/client.rb",
+     "lib/simple_crowd/extended_dash.rb",
+     "lib/simple_crowd/group.rb",
+     "lib/simple_crowd/immutable_hash.rb",
+     "lib/simple_crowd/user.rb",
      "simple_crowd.gemspec",
      "test/helper.rb",
      "test/test_client.rb",
@@ -66,12 +70,14 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<webmock>, [">= 0"])
       s.add_development_dependency(%q<rr>, [">= 0"])
       s.add_runtime_dependency(%q<savon>, [">= 0"])
+      s.add_runtime_dependency(%q<hashie>, [">= 0"])
     else
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<fcoury-matchy>, [">= 0"])
       s.add_dependency(%q<webmock>, [">= 0"])
       s.add_dependency(%q<rr>, [">= 0"])
       s.add_dependency(%q<savon>, [">= 0"])
+      s.add_dependency(%q<hashie>, [">= 0"])
     end
   else
     s.add_dependency(%q<shoulda>, [">= 0"])
@@ -79,6 +85,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<webmock>, [">= 0"])
     s.add_dependency(%q<rr>, [">= 0"])
     s.add_dependency(%q<savon>, [">= 0"])
+    s.add_dependency(%q<hashie>, [">= 0"])
   end
 end
 
