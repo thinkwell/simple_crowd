@@ -1,11 +1,13 @@
 module SimpleCrowd
   class Client
     def initialize options = {}
-      @options = SimpleCrowd.options.merge options
+      @options = SimpleCrowd.soap_options SimpleCrowd.options.merge(options)
+
       # TODO: Fix error handling
       # Errors do not contained Exception info so we'll handle the errors ourselves
       # Savon::Response.raise_errors = false
       # @client = Savon::Client.new @options[:service_url]
+      yield(@options) if block_given?
     end
     def app_token
       @app_token ||= authenticate_application
@@ -71,17 +73,19 @@ module SimpleCrowd
       simple_soap_call :is_group_member, group, user
     end
 
-    def find_user_by_name name
-      simple_soap_call :find_principal_by_name, name
+    def find_group_by_name name
+      group = simple_soap_call :find_group_by_name, name
+      map_group_hash group
     end
 
-    def find_user_by_token token
-      simple_soap_call :find_principal_by_token, token
+    def find_all_group_names
+      (simple_soap_call :find_all_group_names)[:string]
     end
 
-    def find_user_name_by_token token
-      user = find_user_by_token token
-      user[:name]
+    def update_group group, description, active
+      simple_soap_call :update_group, group, description, active  do |res|
+        !res.soap_fault? && res.to_hash.key?(:update_group_response)
+      end
     end
 
     def add_user_to_group user, group
@@ -100,6 +104,30 @@ module SimpleCrowd
       simple_soap_call :reset_principal_credential, name do |res|
         !res.soap_fault? && res.to_hash.key?(:reset_principal_credential_response)
       end
+    end
+
+    def find_all_user_names
+      (simple_soap_call :find_all_principal_names)[:string]
+    end
+
+    def find_user_by_name name
+      map_user_hash simple_soap_call :find_principal_by_name, name
+    end
+
+    def find_user_by_token token
+      map_user_hash simple_soap_call :find_principal_by_token, token
+    end
+
+    def find_username_by_token token
+      user = find_user_by_token token
+      user[:username]
+    end
+
+    def update_user_credential user, credential, encrypted = false
+      simple_soap_call :update_principal_credential, user,
+                       {'auth:credential' => credential, 'auth:encryptedCredential' => encrypted} do |res|
+        !res.soap_fault? && res.to_hash.key?(:update_principal_credential_response)
+      end 
     end
 
     private
@@ -131,6 +159,33 @@ module SimpleCrowd
     def prepare soap
       soap.namespace = @options[:service_ns]
       soap.namespaces.merge! @options[:service_namespaces]
+    end
+
+    # Take Crowd SOAP attribute format and return a simple ruby hash
+    # @param attributes the soap attributes array
+    def process_soap_attributes attributes
+      soap = attributes[:soap_attribute]
+      (soap && soap.inject({}) {|hash, attr| hash[attr[:name].to_sym] = attr[:values][:string]; hash }) || {}
+    end
+
+    # Takes a SOAP user hash returned from the API and maps it into a User object
+    # @param user (soap hash) to map to object
+    def map_user_hash user
+      attributes = process_soap_attributes user[:attributes]
+      supported_keys = attributes.keys & SimpleCrowd::User.mapped_properties(:soap)
+      user = user.merge attributes.inject({}) {|map, (k, v)| map[k] = v if supported_keys.include? k; map}
+      user[:attributes] = attributes.inject({}) {|map, (k, v)| map[k] = v unless supported_keys.include? k; map}
+      user.delete :attributes if user[:attributes].empty?
+      SimpleCrowd::User.new user
+    end
+
+    def map_group_hash group
+      attributes = process_soap_attributes group[:attributes]
+      supported_keys = attributes.keys & SimpleCrowd::Group.mapped_properties(:soap)
+      group = group.merge attributes.inject({}) {|map, (k, v)| map[k] = v if supported_keys.include? k; map}
+      group[:attributes] = attributes.inject({}) {|map, (k, v)| map[k] = v unless supported_keys.include? k; map}
+      group.delete :attributes if group[:attributes].empty?
+      SimpleCrowd::Group.new group
     end
 
     def prepare_validation_factors factors

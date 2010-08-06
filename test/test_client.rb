@@ -3,8 +3,9 @@ require 'helper'
 class TestClient < Test::Unit::TestCase
   context "A Client" do
     setup do
-      @service_url = "http://idp.thinkwell.com:8095/crowd/services/SecurityServer"
+      @service_url = "http://idp.thinkwell.com:8095/crowd/"
       @client = SimpleCrowd::Client.new({:service_url => @service_url, :app_name => "giraffe", :app_password => "test"})
+      @service_url = SimpleCrowd.soap_options({:service_url => @service_url})[:service_url]
       reset_webmock
     end
     should "initialize" do
@@ -104,28 +105,43 @@ class TestClient < Test::Unit::TestCase
       
       @client.reset_user_password("test").should be true
     end
+    should "find all user names" do
+      names = @client.find_all_user_names
+      names.should_not be nil
+      names.is_a?(Array).should be true
+      names.empty?.should be false
+      names.include?("test").should be true
+    end
     should "find user by name" do
       user = @client.find_user_by_name "test"
       user.should_not be nil
-
+      [:id, :username, :description, :active, :directory_id, :first_name, :last_name, :email].each {|v| user.key?(v).should be true}
+      [:id, :username, :active, :directory_id].each {|v| user[v].should_not be nil}
       assert_requested :post, @service_url, :times => 2
     end
     should "find user by token" do
       token = @client.authenticate_user "test", "test"
       user = @client.find_user_by_token token
       user.should_not be nil
-      user[:attributes][:soap_attribute].select {|v| v[:name] == "givenName"}.first[:values][:string].should == "Test"
+      user.first_name.should == "Test"
 
       assert_requested :post, @service_url, :times => 3
     end
-    should "find user name by token" do
+    should "find username by token" do
       token = @client.authenticate_user "test", "test"
-      user = @client.find_user_name_by_token token
+      user = @client.find_username_by_token token
       user.should_not be nil
       user.length.should > 0
       user.should == "test"
 
       assert_requested :post, @service_url, :times => 3
+    end
+    should "update user credential" do
+      @client.authenticate_user("test", "test").should_not be nil
+      @client.update_user_credential("test", "testupdate").should be true
+      lambda {@client.authenticate_user("test", "test")}.should raise_error
+      @client.authenticate_user("test", "testupdate").should_not be nil
+      @client.update_user_credential("test", "test").should be true
     end
     should "check if cache enabled" do
       enabled = @client.is_cache_enabled?
@@ -139,12 +155,36 @@ class TestClient < Test::Unit::TestCase
 
       assert_requested :post, @service_url, :times => 2
     end
+    should "find group by name" do
+      group = @client.find_group_by_name("Testing")
+      group.should_not be nil
+      assert_requested :post, @service_url, :times => 2
+    end
+    should "find all group names" do
+      names = @client.find_all_group_names
+      names.should_not be nil
+      names.is_a?(Array).should be true
+      names.empty?.should be false
+      names.include?("Testing").should be true
+    end
     should "add/remove user from group" do
       @client.add_user_to_group("test", "Testing").should be true
       @client.is_group_member?("Testing", "test").should be true
       @client.remove_user_from_group("test", "Testing").should be true
       @client.is_group_member?("Testing", "test").should be false
       assert_requested :post, @service_url, :times => 5
+    end
+    should "add/remove attribute from group" do
+      @client.add_attribute_to_group("test", "tmpattribute", "Hello World").should be true
+      @client.remove_attribute_from_group("test", "tmpattribute").should be true
+    end
+    should "update group" do
+      @client.find_group_by_name("Testing").active.should be true
+      @client.update_group("Testing", "Test Description", false).should be true
+      updated_group = @client.find_group_by_name("Testing")
+      updated_group.active.should be false
+      updated_group.description.should == "Test Description"
+      @client.update_group("Testing", "", true).should be true
     end
     should "check if user is group member" do
       @client.add_user_to_group("test", "Testing").should be true

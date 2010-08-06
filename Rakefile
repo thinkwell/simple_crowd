@@ -11,11 +11,12 @@ begin
     gem.email = "paul@thestrongfamily.org"
     gem.homepage = "http://github.com/lapluviosilla/simple_crowd"
     gem.authors = ["Paul Strong"]
-    gem.add_development_dependency "shoulda", ">= 0"
+    gem.add_development_dependency "shoulda"
     gem.add_development_dependency "fcoury-matchy"
     gem.add_development_dependency "webmock"
     gem.add_development_dependency "rr"
     gem.add_dependency 'savon'
+    gem.add_dependency 'hashie'
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new

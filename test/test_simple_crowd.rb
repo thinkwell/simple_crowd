@@ -6,16 +6,17 @@ class TestSimpleCrowd < Test::Unit::TestCase
       @default_keys = [:service_url, :service_ns, :service_namespaces, :app_name, :app_password]
     end
     should "return options" do
-      options = SimpleCrowd.options
+      options = SimpleCrowd.soap_options
       options.should_not be nil
       options.empty?.should be false
-      @default_keys.map{|s|options[s]}.each {|v| v.should_not be nil}
+      @default_keys.each {|v| options[v].should_not be nil}
     end
 
     should "only have default options" do
-      options = SimpleCrowd.options
+      options = SimpleCrowd.soap_options
       options.should_not be nil
-      (options.keys - @default_keys).length.should == 0 
+      (options.keys - @default_keys).length.should == 0
+      (@default_keys - options.keys).length.should == 0
     end
   end
 end
