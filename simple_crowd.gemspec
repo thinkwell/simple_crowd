@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{simple_crowd}
-  s.version = "0.1.4"
+  s.version = "0.1.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Paul Strong"]
@@ -45,6 +45,7 @@ Gem::Specification.new do |s|
      "lib/simple_crowd/immutable_hash.rb",
      "lib/simple_crowd/user.rb",
      "simple_crowd.gemspec",
+     "test/crowd_config.yml",
      "test/helper.rb",
      "test/test_client.rb",
      "test/test_simple_crowd.rb"
