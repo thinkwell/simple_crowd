@@ -111,16 +111,16 @@ module SimpleCrowd
     end
 
     def find_user_by_name name
-      map_user_hash simple_soap_call :find_principal_by_name, name
+      map_user_hash simple_soap_call :find_principal_by_name, name rescue nil
     end
 
     def find_user_by_token token
-      map_user_hash simple_soap_call :find_principal_by_token, token
+      map_user_hash simple_soap_call :find_principal_by_token, token rescue nil
     end
 
     def find_username_by_token token
       user = find_user_by_token token
-      user[:username]
+      user && user[:username]
     end
 
     def update_user_credential user, credential, encrypted = false

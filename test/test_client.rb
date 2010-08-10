@@ -139,6 +139,11 @@ class TestClient < Test::Unit::TestCase
 
       assert_requested :post, @service_url, :times => 3
     end
+    should "return nil for nonexistant user" do
+      user = @client.find_user_by_name "nonexistant"
+      user.should be nil
+      assert_requested :post, @service_url, :times => 2
+    end
     should "update user credential" do
       @client.authenticate_user("test", "test").should_not be nil
       @client.update_user_credential("test", "testupdate").should be true
