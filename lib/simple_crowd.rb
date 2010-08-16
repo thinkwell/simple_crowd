@@ -1,8 +1,6 @@
 require 'savon'
 require 'hashie'
 require 'forwardable'
-require 'simple_crowd/immutable_hash'
-require 'simple_crowd/extended_dash'
 require 'simple_crowd/crowd_entity'
 require 'simple_crowd/user'
 require 'simple_crowd/group'
