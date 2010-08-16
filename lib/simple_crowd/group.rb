@@ -1,5 +1,5 @@
 module SimpleCrowd
-  class Group < ExtendedDash
+  class Group < CrowdEntity
     property :id
     property :name
     property :active
