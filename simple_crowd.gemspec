@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Paul Strong"]
-  s.date = %q{2010-08-06}
+  s.date = %q{2010-08-16}
   s.description = %q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.
                          Doesn't do any fancy object mapping, etc.}
   s.email = %q{paul@thestrongfamily.org}
@@ -40,12 +40,15 @@ Gem::Specification.new do |s|
      "doc/top-level-namespace.html",
      "lib/simple_crowd.rb",
      "lib/simple_crowd/client.rb",
+     "lib/simple_crowd/crowd_entity.rb",
      "lib/simple_crowd/extended_dash.rb",
      "lib/simple_crowd/group.rb",
      "lib/simple_crowd/immutable_hash.rb",
+     "lib/simple_crowd/mappers/soap_attributes.rb",
      "lib/simple_crowd/user.rb",
      "simple_crowd.gemspec",
      "test/crowd_config.yml",
+     "test/factories.rb",
      "test/helper.rb",
      "test/test_client.rb",
      "test/test_simple_crowd.rb"
@@ -56,7 +59,8 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.}
   s.test_files = [
-    "test/helper.rb",
+    "test/factories.rb",
+     "test/helper.rb",
      "test/test_client.rb",
      "test/test_simple_crowd.rb"
   ]
@@ -68,6 +72,8 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<fcoury-matchy>, [">= 0"])
+      s.add_development_dependency(%q<factory_girl>, [">= 0"])
+      s.add_development_dependency(%q<forgery>, [">= 0"])
       s.add_development_dependency(%q<webmock>, [">= 0"])
       s.add_development_dependency(%q<rr>, [">= 0"])
       s.add_runtime_dependency(%q<savon>, [">= 0"])
@@ -75,6 +81,8 @@ Gem::Specification.new do |s|
     else
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<fcoury-matchy>, [">= 0"])
+      s.add_dependency(%q<factory_girl>, [">= 0"])
+      s.add_dependency(%q<forgery>, [">= 0"])
       s.add_dependency(%q<webmock>, [">= 0"])
       s.add_dependency(%q<rr>, [">= 0"])
       s.add_dependency(%q<savon>, [">= 0"])
@@ -83,6 +91,8 @@ Gem::Specification.new do |s|
   else
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<fcoury-matchy>, [">= 0"])
+    s.add_dependency(%q<factory_girl>, [">= 0"])
+    s.add_dependency(%q<forgery>, [">= 0"])
     s.add_dependency(%q<webmock>, [">= 0"])
     s.add_dependency(%q<rr>, [">= 0"])
     s.add_dependency(%q<savon>, [">= 0"])

@@ -151,6 +151,19 @@ class TestClient < Test::Unit::TestCase
       @client.authenticate_user("test", "testupdate").should_not be nil
       @client.update_user_credential("test", "test").should be true
     end
+    should "add/remove user" do
+      localuser = Factory.build(:user)
+      user = @client.add_user(localuser, "newuserpass")
+      user.should_not be nil
+      user.username.should == localuser.username
+      user.first_name.should == localuser.first_name
+      user.last_name.should == localuser.last_name
+      @client.authenticate_user(localuser.username, "newuserpass").should_not be nil
+      @client.remove_user(localuser.username).should be true
+      lambda {@client.authenticate_user(localuser.username, "newuserpass")}.should raise_error
+
+      assert_requested :post, @service_url, :times => 5
+    end
     should "check if cache enabled" do
       enabled = @client.is_cache_enabled?
       is_true = enabled.class == TrueClass

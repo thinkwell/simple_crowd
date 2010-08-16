@@ -13,6 +13,8 @@ begin
     gem.authors = ["Paul Strong"]
     gem.add_development_dependency "shoulda"
     gem.add_development_dependency "fcoury-matchy"
+    gem.add_development_dependency "factory_girl"
+    gem.add_development_dependency "forgery"
     gem.add_development_dependency "webmock"
     gem.add_development_dependency "rr"
     gem.add_dependency 'savon'

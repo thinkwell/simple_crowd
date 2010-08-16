@@ -4,12 +4,17 @@ require 'shoulda'
 require 'matchy'
 require 'webmock/test_unit'
 require 'rr'
+require 'factory_girl'
+require 'forgery'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 $CROWD_CONFIG_PATH = File.join(Dir.pwd, 'crowd_config.yml')
 require 'simple_crowd'
+
+# Load factories
+require File.dirname(__FILE__) + "/factories"
 
 WebMock.allow_net_connect!
 

@@ -111,16 +111,38 @@ module SimpleCrowd
     end
 
     def find_user_by_name name
-      map_user_hash simple_soap_call :find_principal_by_name, name rescue nil
+      SimpleCrowd::User.parse_from :soap, simple_soap_call(:find_principal_by_name, name) rescue nil
     end
 
     def find_user_by_token token
-      map_user_hash simple_soap_call :find_principal_by_token, token rescue nil
+      SimpleCrowd::User.parse_from :soap, simple_soap_call(:find_principal_by_token, token) rescue nil
     end
 
     def find_username_by_token token
       user = find_user_by_token token
       user && user[:username]
+    end
+
+    def add_user user, credential
+      return if user.nil? || credential.nil?
+      [:email, :first_name, :last_name].each do |k|
+        user.send(:"#{k}=", "") if user.send(k).nil?
+      end
+      soap_user = user.map_to :soap
+      # We don't use these attributes when creating
+      soap_user.delete(:id)
+      soap_user.delete(:directory_id)
+      # Add blank attributes if missing
+
+      # Declare require namespaces
+      soap_user = soap_user.inject({}) {|hash, (k, v)| hash["int:#{k}"] = v;hash}
+      SimpleCrowd::User.parse_from :soap, simple_soap_call(:add_principal, soap_user, {'auth:credential' => credential, 'auth:encryptedCredential' => false})
+    end
+
+    def remove_user name
+      simple_soap_call :remove_principal, name do |res|
+        !res.soap_fault? && res.to_hash.key?(:remove_principal_response)
+      end
     end
 
     def update_user_credential user, credential, encrypted = false
@@ -136,7 +158,7 @@ module SimpleCrowd
     # @param [Symbol] action the soap action to call
     # @param data the list of args to pass to the server as "in" args (in1, in2, etc.)
     def simple_soap_call action, *data
-      # Take each arg and assign it to "in" keys for SOAP call
+      # Take each arg and assign it to "in" keys for SOAP call starting with in1 (in0 is app token)
       soap_args = data.inject({}){|hash, arg| hash[:"in#{hash.length + 1}"] = arg; hash }
       # Ordered "in" keys ex. in1, in2, etc. for SOAP ordering
       in_keys = soap_args.length ? (1..soap_args.length).collect {|v| :"in#{v}" } : []
@@ -166,17 +188,6 @@ module SimpleCrowd
     def process_soap_attributes attributes
       soap = attributes[:soap_attribute]
       (soap && soap.inject({}) {|hash, attr| hash[attr[:name].to_sym] = attr[:values][:string]; hash }) || {}
-    end
-
-    # Takes a SOAP user hash returned from the API and maps it into a User object
-    # @param user (soap hash) to map to object
-    def map_user_hash user
-      attributes = process_soap_attributes user[:attributes]
-      supported_keys = attributes.keys & SimpleCrowd::User.mapped_properties(:soap)
-      user = user.merge attributes.inject({}) {|map, (k, v)| map[k] = v if supported_keys.include? k; map}
-      user[:attributes] = attributes.inject({}) {|map, (k, v)| map[k] = v unless supported_keys.include? k; map}
-      user.delete :attributes if user[:attributes].empty?
-      SimpleCrowd::User.new user
     end
 
     def map_group_hash group
