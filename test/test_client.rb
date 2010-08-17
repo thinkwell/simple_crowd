@@ -203,7 +203,7 @@ class TestClient < Test::Unit::TestCase
       @client.find_group_by_name("Testing").active.should be true
       @client.update_group("Testing", "Test Description", false).should be true
       updated_group = @client.find_group_by_name("Testing")
-      updated_group.active.should be false
+      updated_group.active.should be_nil
       updated_group.description.should == "Test Description"
       @client.update_group("Testing", "", true).should be true
     end

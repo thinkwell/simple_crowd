@@ -74,8 +74,7 @@ module SimpleCrowd
     end
 
     def find_group_by_name name
-      group = simple_soap_call :find_group_by_name, name
-      map_group_hash group
+      SimpleCrowd::Group.parse_from :soap, simple_soap_call(:find_group_by_name, name)
     end
 
     def find_all_group_names
