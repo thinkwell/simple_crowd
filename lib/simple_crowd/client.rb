@@ -151,6 +151,33 @@ module SimpleCrowd
       end 
     end
 
+    # Only supports single value attributes
+    # TODO: Allow value arrays
+    # @param user [String] name of user to update
+    # @param name [String] of attribute to update
+    # @param value [String] of attribute to update
+    def update_user_attribute user, name, value
+      return unless (name.is_a?(String) || name.is_a?(Symbol)) && value.is_a?(String)
+      soap_attr = SimpleCrowd::Mappers::SoapAttributes.produce({name => value})
+      simple_soap_call :update_principal_attribute, user, soap_attr['int:SOAPAttribute'][0] do |res|
+        !res.soap_fault? && res.to_hash.key?(:update_principal_attribute_response)
+      end
+    end
+
+    # @param user [SimpleCrowd::User] dirty user to update
+    def update_user user
+      return unless user.dirty?
+      # Exclude non-attribute properties (only attributes can be updated in crowd)
+      attrs_to_update = user.dirty_properties & user.attributes.keys
+      return if attrs_to_update.empty?
+
+      attrs_to_update.each do |a|
+        prop = SimpleCrowd::User.property_by_name a
+        soap_prop = prop.maps[:soap].nil? ? prop : prop.maps[:soap]
+        self.update_user_attribute user.username, soap_prop, user.send(a)
+      end
+    end
+
     private
     
     # Simplify the duplicated soap calls across methods

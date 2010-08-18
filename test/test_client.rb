@@ -164,6 +164,41 @@ class TestClient < Test::Unit::TestCase
 
       assert_requested :post, @service_url, :times => 5
     end
+    should "update user attribute" do
+      localuser = Factory.build(:user, :username => "test_update")
+      remoteuser = @client.add_user(localuser, "updatepass")
+      @client.update_user_attribute(remoteuser.username, 'givenName', 'UpdatedFirst').should be true
+      updateduser = @client.find_user_by_name(remoteuser.username)
+      updateduser.last_name.should == localuser.last_name
+      updateduser.first_name.should == 'UpdatedFirst'
+      @client.remove_user(remoteuser.username).should be true
+    end
+    should "update user" do
+      localuser = Factory.build(:user, :username => "test_update")
+      remoteuser = @client.add_user(localuser, "updatepass")
+      remoteuser.should_not be nil
+      remoteuser.username.should == localuser.username
+      remoteuser.first_name.should == localuser.first_name
+      remoteuser.last_name.should == localuser.last_name
+
+      remoteuser.dirty?.should be false
+      # Should be ignored
+      remoteuser.active = false
+      remoteuser.first_name = "UpdatedFirst"
+      remoteuser.last_name = "UpdatedLast"
+      remoteuser.dirty?.should be true
+
+      remoteuser.dirty_attributes.should == [:first_name, :last_name]
+
+      @client.update_user(remoteuser)
+
+      updateduser = @client.find_user_by_name(localuser.username)
+      updateduser.first_name.should == "UpdatedFirst"
+      updateduser.last_name.should == "UpdatedLast"
+      updateduser.email.should == localuser.email
+
+      @client.remove_user(remoteuser.username).should be true
+    end
     should "check if cache enabled" do
       enabled = @client.is_cache_enabled?
       is_true = enabled.class == TrueClass

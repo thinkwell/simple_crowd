@@ -10,11 +10,9 @@ module SimpleCrowd
     def immutable?; @immutable; end
     def is_attribute?; @attribute end
   end
+  # For a property to be declared dirty you must use setters instead of []=
   class CrowdEntity < Hashie::Dash
-
     def initialize(attributes = {})
-      # Hack to allow first assignment of immutable properties
-      @initializing = true
       self.class.properties.each do |prop|
         self.send("#{prop.name}=", self.class.defaults[prop.name.to_sym])
       end
@@ -25,7 +23,8 @@ module SimpleCrowd
         next if prop.nil?
         self.send("#{att}=", value)
       end
-      @initializing = false
+      # We just initialized the attributes so clear the dirty status
+      dirty_properties.clear
     end
 
     def self.property(property_name, options = {})
@@ -36,12 +35,14 @@ module SimpleCrowd
       options.reject! {|key, val| key.to_s =~ /^map_(.*)$/ || key.to_s =~ /^mapper_(.*)$/ }
       (@properties ||= []) << ExtendedProperty.new({:name => property_name, :maps => maps, :mappers => mappers}.merge(options))
 
+      # Dirty properties hack
       if options[:attribute]
         class_eval <<-RUBY
           def #{property_name}
             self[:attributes][:#{property_name}]
           end
           def #{property_name}=(val)
+            (dirty_properties << :#{property_name}).uniq!
             self[:attributes][:#{property_name}] = val
           end
         RUBY
@@ -52,6 +53,7 @@ module SimpleCrowd
           end
 
           def #{property_name}=(val)
+            (dirty_properties << :#{property_name}).uniq!
             self[:#{property_name}] = val
           end
         RUBY
@@ -140,6 +142,28 @@ module SimpleCrowd
         hash
       end
       self.new(parsed_entity)
+    end
+
+    def dirty_properties
+      @dirty_properties ||= Array.new
+    end
+
+    def dirty_attributes
+      dirty_properties & self[:attributes].keys
+    end
+
+    def dirty?
+      !@dirty_properties.empty?
+    end
+
+    def property_dirty? property
+      @dirty_properties.include? property
+    end
+
+    # Utility method for updating and marking attributes as dirty
+    def update_with attrs
+      current_keys = self.keys | self[:attributes].keys
+      attrs.each_pair {|k, v| self.send(:"#{k}=", v) if current_keys.include?(k) && v != self.send(k.to_sym)}
     end
     
     property :attributes, :default => {}, :mapper_soap => SimpleCrowd::Mappers::SoapAttributes
