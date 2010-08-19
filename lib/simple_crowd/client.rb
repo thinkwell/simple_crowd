@@ -189,13 +189,34 @@ module SimpleCrowd
       # Ordered "in" keys ex. in1, in2, etc. for SOAP ordering
       in_keys = soap_args.length ? (1..soap_args.length).collect {|v| :"in#{v}" } : []
       # Make the SOAP call to the dynamic action
-      response = client.send :"#{action}!" do |soap|
-        prepare soap
-        # Pass in all the args as "in" vars
-        soap.body = {:in0 => hash_authenticated_token}.merge(soap_args).merge({:order! => [:in0, *in_keys]})
+      response = with_app_token do
+        client.send :"#{action}!" do |soap|
+          prepare soap
+          # Pass in all the args as "in" vars
+          soap.body = {:in0 => hash_authenticated_token}.merge(soap_args).merge({:order! => [:in0, *in_keys]})
+        end
       end
       # If a block is given then call it and pass in the response object, otherwise get the default out value
       block_given? ? yield(response) : response.to_hash[:"#{action}_response"][:out]
+    end
+
+    def with_app_token retries = 1, &block
+      begin
+        Savon::Response.raise_errors = false
+        response = block.call
+        raise CrowdError.new(response.soap_fault, response.to_hash[:fault]) if response.soap_fault?
+        return response
+      rescue CrowdError => e
+        if retries && e.type?(:invalid_authorization_token_exception)
+          # Clear token to force a refresh
+          self.app_token = nil
+          retries -= 1
+          retry
+        end
+        raise
+      ensure
+        Savon::Response.raise_errors = true
+      end
     end
 
     # Generate new client on every request (Savon bug?)

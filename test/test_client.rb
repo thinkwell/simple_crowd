@@ -22,6 +22,20 @@ class TestClient < Test::Unit::TestCase
       
       assert_requested :post, @service_url
     end
+    should "refresh app token if invalid" do
+      # Get initial valid token
+      token = @client.app_token
+      info = @client.get_cookie_info
+      info.should_not be nil
+      @client.app_token = token + "invalid"
+      @client.app_token.should == token + "invalid"
+      # making the token invalid should cause the client to refresh it
+      # and get the cookie info successfully
+      @client.get_cookie_info.should == info
+      # Validate refreshed token is same as original token
+      @client.app_token.should == token
+      assert_requested :post, @service_url, :times => 5
+    end
     should "get cookie info" do
       info = @client.get_cookie_info
       info.should_not be nil
