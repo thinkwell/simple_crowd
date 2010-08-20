@@ -31,6 +31,7 @@ module SimpleCrowd
           'auth:credential' => {'auth:credential' => password}
         }.merge(no_validation_factors)}
       end
+      raise CrowdError.new(response.soap_fault, response.to_hash[:fault]) if response.soap_fault?
       response.to_hash[:authenticate_application_response][:out][:token]
     end
 
