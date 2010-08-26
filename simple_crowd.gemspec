@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{simple_crowd}
-  s.version = "0.1.8"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Paul Strong"]
-  s.date = %q{2010-08-18}
+  s.date = %q{2010-08-26}
   s.description = %q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.
                          Doesn't do any fancy object mapping, etc.}
   s.email = %q{paul@thestrongfamily.org}
@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
      "lib/simple_crowd.rb",
      "lib/simple_crowd/client.rb",
      "lib/simple_crowd/crowd_entity.rb",
+     "lib/simple_crowd/crowd_error.rb",
      "lib/simple_crowd/group.rb",
      "lib/simple_crowd/mappers/soap_attributes.rb",
      "lib/simple_crowd/user.rb",
