@@ -114,6 +114,10 @@ module SimpleCrowd
       SimpleCrowd::User.parse_from :soap, simple_soap_call(:find_principal_by_name, name) rescue nil
     end
 
+    def find_user_with_attributes_by_name name
+      SimpleCrowd::User.parse_from :soap, simple_soap_call(:find_principal_with_attributes_by_name, name) rescue nil
+    end
+
     def find_user_by_token token
       SimpleCrowd::User.parse_from :soap, simple_soap_call(:find_principal_by_token, token) rescue nil
     end
@@ -158,18 +162,19 @@ module SimpleCrowd
     # @param name [String] of attribute to update
     # @param value [String] of attribute to update
     def update_user_attribute user, name, value
-      return unless (name.is_a?(String) || name.is_a?(Symbol)) && value.is_a?(String)
+      return unless (name.is_a?(String) || name.is_a?(Symbol)) && (value.is_a?(String) || value.is_a?(Array))
       soap_attr = SimpleCrowd::Mappers::SoapAttributes.produce({name => value})
       simple_soap_call :update_principal_attribute, user, soap_attr['int:SOAPAttribute'][0] do |res|
         !res.soap_fault? && res.to_hash.key?(:update_principal_attribute_response)
       end
     end
+    alias_method :add_user_attribute, :update_user_attribute
 
     # @param user [SimpleCrowd::User] dirty user to update
     def update_user user
       return unless user.dirty?
       # Exclude non-attribute properties (only attributes can be updated in crowd)
-      attrs_to_update = user.dirty_properties & user.attributes.keys
+      attrs_to_update = user.dirty_attributes
       return if attrs_to_update.empty?
 
       attrs_to_update.each do |a|

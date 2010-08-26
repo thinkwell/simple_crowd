@@ -4,11 +4,10 @@ class TestClient < Test::Unit::TestCase
   CROWD_CONFIG = YAML.load_file($CROWD_CONFIG_PATH)['crowd']
   context "A Client" do
     setup do
-      @service_url = CROWD_CONFIG['service_url']
-      @client = SimpleCrowd::Client.new({:service_url => @service_url,
+      @client = SimpleCrowd::Client.new({:service_url => CROWD_CONFIG['service_url'],
                                          :app_name => CROWD_CONFIG['app_name'],
                                          :app_password => CROWD_CONFIG['app_password']})
-      @service_url = SimpleCrowd.soap_options({:service_url => @service_url})[:service_url]
+      @service_url = SimpleCrowd.soap_options({:service_url => CROWD_CONFIG['service_url']})[:service_url]
       reset_webmock
     end
     should "initialize" do
@@ -178,17 +177,47 @@ class TestClient < Test::Unit::TestCase
 
       assert_requested :post, @service_url, :times => 5
     end
+    
     should "update user attribute" do
-      localuser = Factory.build(:user, :username => "test_update")
+      username = "test_update"
+      localuser = Factory.build(:user, :username => username)
       remoteuser = @client.add_user(localuser, "updatepass")
-      @client.update_user_attribute(remoteuser.username, 'givenName', 'UpdatedFirst').should be true
-      updateduser = @client.find_user_by_name(remoteuser.username)
+      @client.update_user_attribute(username, 'givenName', 'UpdatedFirst').should be true
+      updateduser = @client.find_user_by_name(username)
       updateduser.last_name.should == localuser.last_name
       updateduser.first_name.should == 'UpdatedFirst'
-      @client.remove_user(remoteuser.username).should be true
+      @client.remove_user "test_update"
+    end
+    should "update user custom attribute" do
+      username = "test_update"
+      localuser = Factory.build(:user, :username => username)
+      remoteuser = @client.add_user(localuser, "updatepass")
+      @client.update_user_attribute(username, 'customAttr', 'customVal').should be true
+      remoteuser = @client.find_user_with_attributes_by_name username
+      remoteuser.last_name.should == localuser.last_name
+
+      remoteuser[:customAttr].should == 'customVal'
+      @client.remove_user "test_update"
+    end
+    should "update user attribute array" do
+      username = "test_update"
+      localuser = Factory.build(:user, :username => username)
+      remoteuser = @client.add_user(localuser, "updatepass")
+      test_array = ["one", "two", "4"]
+      @client.update_user_attribute(username, 'arrayTest', test_array).should be true
+      remoteuser = @client.find_user_with_attributes_by_name username
+      remoteuser.last_name.should == localuser.last_name
+      remoteuser[:arrayTest].sort.should == test_array.sort
+      test_array.delete "two"
+      @client.update_user_attribute(username, 'arrayTest', test_array).should be true
+      remoteuser = @client.find_user_with_attributes_by_name username
+      remoteuser[:arrayTest].sort.should == test_array.sort
+      remoteuser[:arrayTest].include?("two").should be false
+      @client.remove_user "test_update"
     end
     should "update user" do
-      localuser = Factory.build(:user, :username => "test_update")
+      username = "test_update"
+      localuser = Factory.build(:user, :username => username)
       remoteuser = @client.add_user(localuser, "updatepass")
       remoteuser.should_not be nil
       remoteuser.username.should == localuser.username
@@ -206,12 +235,11 @@ class TestClient < Test::Unit::TestCase
 
       @client.update_user(remoteuser)
 
-      updateduser = @client.find_user_by_name(localuser.username)
-      updateduser.first_name.should == "UpdatedFirst"
-      updateduser.last_name.should == "UpdatedLast"
-      updateduser.email.should == localuser.email
-
-      @client.remove_user(remoteuser.username).should be true
+      remoteuser = @client.find_user_with_attributes_by_name username
+      remoteuser.first_name.should == "UpdatedFirst"
+      remoteuser.last_name.should == "UpdatedLast"
+      remoteuser.email.should == localuser.email
+      @client.remove_user "test_update"
     end
     should "check if cache enabled" do
       enabled = @client.is_cache_enabled?
@@ -252,7 +280,7 @@ class TestClient < Test::Unit::TestCase
       @client.find_group_by_name("Testing").active.should be true
       @client.update_group("Testing", "Test Description", false).should be true
       updated_group = @client.find_group_by_name("Testing")
-      updated_group.active.should be_nil
+      updated_group.active.should be false
       updated_group.description.should == "Test Description"
       @client.update_group("Testing", "", true).should be true
     end
