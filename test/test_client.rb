@@ -177,7 +177,7 @@ class TestClient < Test::Unit::TestCase
 
       assert_requested :post, @service_url, :times => 5
     end
-    
+
     should "update user attribute" do
       username = "test_update"
       localuser = Factory.build(:user, :username => username)

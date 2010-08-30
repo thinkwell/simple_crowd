@@ -113,7 +113,7 @@ module SimpleCrowd
           mapper = prop.mappers[type]
           #val = val.inject({}) {|attrs, (k, v)| attrs[property_by_name(k).maps[type]]= v unless v.nil?; attrs} if key == :attributes
           val = mapper.produce val unless mapper.nil?
-          if prop.attribute || attributes_keys.include?(key)
+          if prop.attribute || entity.attributes_keys.include?(key)
             attrs[mapped_key] = val
           else
             hash[mapped_key] = val
