@@ -15,8 +15,6 @@ module SimpleCrowd
         self.send("#{prop.name}=", self.class.defaults[prop.name.to_sym])
       end
       attrs = data[:attributes].nil? ? [] : data[:attributes].keys
-      ak = attributes_keys
-      a = attributes
       data.merge! data[:attributes] unless attrs.empty?
       data.delete :attributes
       data.each_pair do |att, value|

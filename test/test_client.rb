@@ -152,6 +152,38 @@ class TestClient < Test::Unit::TestCase
 
       assert_requested :post, @service_url, :times => 3
     end
+    should "find user by email" do
+      user = @client.find_user_by_email "test@testing.com"
+      user.should_not be nil
+      user.first_name.should == "Test"
+      user.last_name.should == "User"
+
+      # partial searches should return nothing
+      user = @client.find_user_by_email "test"
+      user.should be nil
+
+      assert_requested :post, @service_url, :times => 3
+    end
+    should "search for users by email" do
+      users = @client.search_users_by_email "test"
+      users.empty?.should_not be true
+      users.all?{|u| u.email =~ /test/ }.should be true
+
+      assert_requested :post, @service_url, :times => 2
+    end
+    should "search users" do
+      users = @client.search_users({'principal.email' => "test@testing.com"})
+      users.should_not be nil
+      users.empty?.should_not be true
+      users.all?{|u| u.email == "test@testing.com" }.should be true
+
+      users = @client.search_users({'principal.fullname' => "Test"})
+      users.should_not be nil
+      users.empty?.should_not be true
+      users.all?{|u| u.first_name == "Test" }.should be true
+
+      assert_requested :post, @service_url, :times => 3
+    end
     should "return nil for nonexistant user" do
       user = @client.find_user_by_name "nonexistant"
       user.should be nil

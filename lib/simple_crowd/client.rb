@@ -127,6 +127,23 @@ module SimpleCrowd
       user && user[:username]
     end
 
+    # Exact email match
+    def find_user_by_email email
+      search_users_by_email(email).find{|u| u.email == email}
+    end
+
+    # Partial email match
+    def search_users_by_email email
+      search_users({'principal.email' => email})
+    end
+
+    def search_users restrictions
+      soap_restrictions = prepare_search_restrictions restrictions
+      users = simple_soap_call :search_principals, soap_restrictions rescue []
+      users = users[:soap_principal].is_a?(Array) ? users[:soap_principal] : [users[:soap_principal]]
+      users.map{|u| SimpleCrowd::User.parse_from :soap, u}
+    end
+
     def add_user user, credential
       return if user.nil? || credential.nil?
       [:email, :first_name, :last_name].each do |k|
@@ -255,6 +272,12 @@ module SimpleCrowd
     def prepare_validation_factors factors
       {'auth:validationFactor' =>
               factors.inject([]) {|arr, factor| arr << {'auth:name' => factor[0], 'auth:value' => factor[1]} }
+      }
+    end
+
+    def prepare_search_restrictions restrictions
+      {'int:searchRestriction' =>
+          restrictions.inject([]) {|arr, restrict| arr << {'int:name' => restrict[0], 'int:value' => restrict[1]}}
       }
     end
 

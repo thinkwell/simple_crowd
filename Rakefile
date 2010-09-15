@@ -18,7 +18,7 @@ begin
     gem.add_development_dependency "webmock"
     gem.add_development_dependency "rr"
     gem.add_dependency 'savon'
-    gem.add_dependency 'hashie'
+    gem.add_dependency 'hashie', '0.3.0'
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
