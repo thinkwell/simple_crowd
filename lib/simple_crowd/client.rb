@@ -140,7 +140,7 @@ module SimpleCrowd
     def search_users restrictions
       soap_restrictions = prepare_search_restrictions restrictions
       users = simple_soap_call :search_principals, soap_restrictions rescue []
-      users = users[:soap_principal].is_a?(Array) ? users[:soap_principal] : [users[:soap_principal]] unless users.blank?
+      users = users[:soap_principal].is_a?(Array) ? users[:soap_principal] : [users[:soap_principal]] unless users.nil?
       users.map{|u| SimpleCrowd::User.parse_from :soap, u}
     end
 
