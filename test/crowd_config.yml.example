@@ -1,6 +1,6 @@
 # Configure Crowd Test server for unit tests
 # Replace default values with crowd server params
 crowd:
-  service_url: http://localhost:8095/crowd/
-  app_name: crowd
-  app_password: 
+  service_url: http://www.crowdserver.com:8095/crowd/
+  app_name: crowdapp
+  app_password: testpass
