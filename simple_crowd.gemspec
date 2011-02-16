@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.test_files = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.homepage = %q{http://github.com/lapluviosilla/simple_crowd}
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.5.0}
   s.summary = %q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.}
 
   s.add_development_dependency(%q<shoulda>, [">= 0"])
