@@ -101,12 +101,13 @@ module SimpleCrowd
       attrs = {}
       out = entity.inject({}) do |hash, (key, val)|
         key = key.to_sym
+        catch(:skip_prop) do
         unless val.nil?
           mapped_key = map[key].nil? ? key : map[key]
           prop = property_by_name key
           if prop.nil?
             attrs[mapped_key] = val
-            next
+            throw :skip_prop
           end
           mapper = prop.mappers[type]
           #val = val.inject({}) {|attrs, (k, v)| attrs[property_by_name(k).maps[type]]= v unless v.nil?; attrs} if key == :attributes
@@ -116,6 +117,7 @@ module SimpleCrowd
           else
             hash[mapped_key] = val
           end
+        end
         end
         hash
       end

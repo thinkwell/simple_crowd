@@ -19,5 +19,6 @@ rdoc
 pkg
 .idea
 .yardoc
+.bundle
 
 ## PROJECT::SPECIFIC
