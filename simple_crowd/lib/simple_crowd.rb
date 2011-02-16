@@ -1,0 +1,3 @@
+module SimpleCrowd
+  # Your code goes here...
+end
