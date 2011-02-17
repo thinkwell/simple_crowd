@@ -13,8 +13,36 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = [
     "README.rdoc"
   ]
-  s.files = `git ls-files`.split("\n")
-  s.test_files = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.files = %w(
+    .gitignore
+    Gemfile
+    Gemfile.lock
+    README.rdoc
+    Rakefile
+    lib/simple_crowd.rb
+    lib/simple_crowd/client.rb
+    lib/simple_crowd/crowd_entity.rb
+    lib/simple_crowd/crowd_error.rb
+    lib/simple_crowd/group.rb
+    lib/simple_crowd/mappers/soap_attributes.rb
+    lib/simple_crowd/user.rb
+    lib/simple_crowd/version.rb
+    simple_crowd.gemspec
+    test/crowd_config.yml.example
+    test/factories.rb
+    test/helper.rb
+    test/test_client.rb
+    test/test_simple_crowd.rb
+    test/test_user.rb
+  )
+  s.test_files = %w(
+    test/crowd_config.yml.example
+    test/factories.rb
+    test/helper.rb
+    test/test_client.rb
+    test/test_simple_crowd.rb
+    test/test_user.rb
+  )
   s.homepage = %q{http://github.com/lapluviosilla/simple_crowd}
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.5.0}
