@@ -170,6 +170,10 @@ module SimpleCrowd
       prop.nil? ? !@dirty_properties.empty? : @dirty_properties.include?(prop)
     end
 
+    def clean
+      @dirty_properties = Array.new
+    end
+
     def update_with attrs
       current_keys = attributes_keys
       attrs.each_pair {|k, v| self.send(:"#{k}=", v) if current_keys.include?(k) && v != self.send(k.to_sym)}
