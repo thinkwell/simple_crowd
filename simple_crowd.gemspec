@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
     lib/simple_crowd/crowd_error.rb
     lib/simple_crowd/group.rb
     lib/simple_crowd/mappers/soap_attributes.rb
+    lib/simple_crowd/mock_client.rb
     lib/simple_crowd/user.rb
     lib/simple_crowd/version.rb
     simple_crowd.gemspec
