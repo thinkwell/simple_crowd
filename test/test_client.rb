@@ -180,7 +180,7 @@ class TestClient < Test::Unit::TestCase
       users = @client.search_users({'principal.fullname' => "Test"})
       users.should_not be nil
       users.empty?.should_not be true
-      users.all?{|u| u.first_name == "Test" }.should be true
+      users.each{|u| u.display_name.downcase.should =~ /test/ }
 
       assert_requested :post, @service_url, :times => 3
     end
