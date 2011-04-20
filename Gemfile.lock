@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    simple_crowd (0.3.0)
-      hashie (= 0.3.0)
+    simple_crowd (0.3.5)
+      hashie (= 1.0.0)
       savon (= 0.7.9)
 
 GEM
@@ -15,7 +15,7 @@ GEM
     fcoury-matchy (0.4.0)
     forgery (0.3.7)
       nokogiri (~> 1.4)
-    hashie (0.3.0)
+    hashie (1.0.0)
     nokogiri (1.4.4)
     rr (1.0.2)
     savon (0.7.9)

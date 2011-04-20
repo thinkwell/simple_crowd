@@ -50,7 +50,7 @@ class TestUser < Test::Unit::TestCase
         {:name => "customAttr", :values => {:string => ["custom1", "custom2"]}}
       ]}}
       obj_user = SimpleCrowd::User.parse_from :soap, soap_user
-      obj_user.should_not be nil
+      obj_user.should_not be_nil
       obj_user.active.should == true
       obj_user.first_name.should == "parsefirstname"
       obj_user.last_name.should == "parselastname"

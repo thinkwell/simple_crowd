@@ -10,7 +10,7 @@ module SimpleCrowd
     def is_attribute?; @attribute end
   end
   class CrowdEntity < Hashie::Mash
-    def initialize(data = {})
+    def initialize(data = {}, notused = nil)
       self.class.properties.each do |prop|
         self.send("#{prop.name}=", self.class.defaults[prop.name.to_sym])
       end
@@ -80,7 +80,7 @@ module SimpleCrowd
     end
 
     def self.defaults
-      properties.inject({}) {|hash, prop| hash[prop.name] = prop.default unless prop.default.nil?; hash }
+      properties.inject({}) {|hash, prop| hash[prop.name] = prop['default'] unless prop['default'].nil?; hash }
     end
 
     def self.attribute_mappers hash = nil
@@ -176,7 +176,7 @@ module SimpleCrowd
 
     def update_with attrs
       current_keys = attributes_keys
-      attrs.each_pair {|k, v| self.send(:"#{k}=", v) if current_keys.include?(k) && v != self.send(k.to_sym)}
+      attrs.each_pair {|k, v| self.send(:"#{k}=", v) if current_keys.include?(k.to_sym) && v != self.send(k.to_sym)}
     end
 
     def []= key, val

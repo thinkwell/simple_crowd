@@ -56,6 +56,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency(%q<webmock>, [">= 0"])
   s.add_development_dependency(%q<rr>, [">= 0"])
   s.add_runtime_dependency(%q<savon>, ["= 0.7.9"])
-  s.add_runtime_dependency(%q<hashie>, ["= 0.3.0"])
+  s.add_runtime_dependency(%q<hashie>, ["= 1.0.0"])
 end
 
