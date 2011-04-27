@@ -1,3 +1,3 @@
 module SimpleCrowd
-  VERSION = "0.3.6"
+  VERSION = "1.0.0"
 end
