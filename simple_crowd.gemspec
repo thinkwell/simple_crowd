@@ -10,14 +10,10 @@ Gem::Specification.new do |s|
   s.description = %q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.
                          Doesn't do any fancy object mapping, etc.}
   s.email = %q{paul@thestrongfamily.org}
-  s.extra_rdoc_files = [
-    "README.rdoc"
-  ]
   s.files = %w(
     .gitignore
     Gemfile
-    Gemfile.lock
-    README.rdoc
+    README.md
     Rakefile
     lib/simple_crowd.rb
     lib/simple_crowd/client.rb
