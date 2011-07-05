@@ -2,15 +2,16 @@
 module SimpleCrowd
   class MockClient
     class << self
-      attr_accessor :users, :tokens
+      attr_accessor :users, :tokens, :groups
 
       def reset
-        @users, @tokens = [], []
+        @users, @tokens, @groups = [], [], []
       end
     end
 
     @users = []
     @tokens = []
+    @groups = []
 
     def get_cookie_info
       {:secure=>false, :domain=>".twcrowdtest.com"}
@@ -87,6 +88,17 @@ module SimpleCrowd
       end
     end
 
+    def is_group_member? group, user
+      group = find_group_by_name(group) unless group.is_a?(SimpleCrowd::Group)
+      !!(group && group.members.detect{|m| m == user})
+    end
+    def find_group_by_name name
+      groups.detect{|g| g.name == name}
+    end
+    def find_all_group_names
+      groups.map{|g| g.name}
+    end
+
     private
     def new_user_token username
       random_token(username).tap{|t| tokens << t}
@@ -97,6 +109,7 @@ module SimpleCrowd
 
     def tokens; self.class.tokens; end
     def users; self.class.users; end
+    def groups; self.class.groups; end
 
   end
 end
