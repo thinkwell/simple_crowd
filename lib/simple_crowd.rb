@@ -17,10 +17,9 @@ module SimpleCrowd
     end
 
     def options app_options = {}
-      c = soap_options.merge(default_crowd_options).merge(rails_config_options).merge(app_options) and
+      c = soap_options.merge(default_crowd_options).merge(app_options) and
           c.merge(:service_url => c[:service_url] + 'services/SecurityServer')
     end
-
     def soap_options
       @soap_options ||= {
         :service_ns => "urn:SecurityServer",
@@ -39,15 +38,14 @@ module SimpleCrowd
         :app_name => "crowd",
         :app_password => ""
       }
+      @default_crowd_options.merge(config_file_options) if defined?(IRB)
     end
-    def rails_config_options
-      @rails_config_options ||= begin
-        FileTest.exists?('config/crowd.yml') &&
+    def config_file_options
+      @config_file_options ||= begin
+        (File.exists?('config/crowd.yml') &&
             yml = (YAML.load_file('config/crowd.yml')[ENV["RAILS_ENV"] || "development"] || {}) and
-            yml.symbolize_keys!
+            yml.symbolize_keys!) || {}
       end
     end
   end
 end
-
-
