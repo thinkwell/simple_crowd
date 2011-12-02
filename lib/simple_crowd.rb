@@ -1,5 +1,6 @@
 require 'savon'
 require 'hashie'
+require 'yaml'
 require 'forwardable'
 require 'simple_crowd/crowd_entity'
 require 'simple_crowd/crowd_error'
@@ -14,16 +15,14 @@ module SimpleCrowd
     def config &config_block
       config_block.call(options)
     end
-    # SimpleCrowd default options
-    def options
-      @options ||= {
-        :service_url => "http://localhost:8095/crowd/",
-        :app_name => "crowd",
-        :app_password => ""
-      }
+
+    def options app_options = {}
+      c = soap_options.merge(default_crowd_options).merge(rails_config_options).merge(app_options) and
+          c.merge(:service_url => c[:service_url] + 'services/SecurityServer')
     end
-    def soap_options base_options = self.options
-      @soap_options ||= base_options.merge({
+
+    def soap_options
+      @soap_options ||= {
         :service_ns => "urn:SecurityServer",
         :service_namespaces => {
           'xmlns:auth' => 'http://authentication.integration.crowd.atlassian.com',
@@ -32,8 +31,21 @@ module SimpleCrowd
           'xmlns:xsd' => 'http://www.w3.org/2001/XMLSchema',
           'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance'
         }
-      })
-      @soap_options.merge!({:service_url => base_options[:service_url] + 'services/SecurityServer'})
+      }
+    end
+    def default_crowd_options
+      @default_crowd_options ||= {
+        :service_url => "http://localhost:8095/crowd/",
+        :app_name => "crowd",
+        :app_password => ""
+      }
+    end
+    def rails_config_options
+      @rails_config_options ||= begin
+        FileTest.exists?('config/crowd.yml') &&
+            yml = (YAML.load_file('config/crowd.yml')[ENV["RAILS_ENV"] || "development"] || {}) and
+            yml.symbolize_keys!
+      end
     end
   end
 end
