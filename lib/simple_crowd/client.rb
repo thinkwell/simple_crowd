@@ -1,7 +1,7 @@
 module SimpleCrowd
   class Client
     def initialize options = {}
-      @options = SimpleCrowd.soap_options SimpleCrowd.options.merge(options)
+      @options = SimpleCrowd.options options
 
       # TODO: Fix error handling
       # Errors do not contained Exception info so we'll handle the errors ourselves
