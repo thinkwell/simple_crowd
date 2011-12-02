@@ -38,7 +38,7 @@ module SimpleCrowd
         :app_name => "crowd",
         :app_password => ""
       }
-      @default_crowd_options.merge(config_file_options) if defined?(IRB)
+      defined?(IRB) ? @default_crowd_options.merge(config_file_options) : @default_crowd_options
     end
     def config_file_options
       @config_file_options ||= begin
