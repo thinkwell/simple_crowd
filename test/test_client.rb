@@ -7,7 +7,7 @@ class TestClient < Test::Unit::TestCase
       @client = SimpleCrowd::Client.new({:service_url => CROWD_CONFIG['service_url'],
                                          :app_name => CROWD_CONFIG['app_name'],
                                          :app_password => CROWD_CONFIG['app_password']})
-      @service_url = SimpleCrowd.soap_options({:service_url => CROWD_CONFIG['service_url']})[:service_url]
+      @service_url = @client.options[:service_url]
       reset_webmock
     end
     should "initialize" do

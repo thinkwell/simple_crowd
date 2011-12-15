@@ -1,5 +1,8 @@
 module SimpleCrowd
   class Client
+
+    attr_reader :options
+
     def initialize options = {}
       @options = SimpleCrowd.options options
 
