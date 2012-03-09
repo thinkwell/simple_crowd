@@ -234,7 +234,7 @@ module SimpleCrowd
         raise CrowdError.new(response.soap_fault, response.to_hash[:fault]) if response.soap_fault?
         return response
       rescue CrowdError => e
-        if retries && e.type?(:invalid_authorization_token_exception)
+        if retries > 0 && e.type?(:invalid_authorization_token_exception)
           # Clear token to force a refresh
           self.app_token = nil
           retries -= 1
