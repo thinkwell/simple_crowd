@@ -40,7 +40,7 @@ Gem::Specification.new do |s|
     test/test_simple_crowd.rb
     test/test_user.rb
   )
-  s.homepage = %q{http://github.com/lapluviosilla/simple_crowd}
+  s.homepage = %q{http://github.com/thinkwell/simple_crowd}
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.5.0}
   s.summary = %q{Simple Atlassian Crowd client using REST and SOAP APIs where needed.}
