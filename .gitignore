@@ -1,3 +1,4 @@
+Gemfile.lock
 ## MAC OS
 .DS_Store
 
@@ -21,6 +22,7 @@ pkg
 .idea
 .yardoc
 .bundle
+.rvmrc
 
 ## PROJECT::SPECIFIC
 test/crowd_config.yml
