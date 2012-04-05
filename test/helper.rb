@@ -20,7 +20,6 @@ require File.dirname(__FILE__) + "/factories"
 WebMock.allow_net_connect!
 
 class Test::Unit::TestCase
-  include WebMock
   include RR::Adapters::TestUnit
   def setup
     WebMock.allow_net_connect!

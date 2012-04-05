@@ -8,7 +8,7 @@ class TestClient < Test::Unit::TestCase
                                          :app_name => CROWD_CONFIG['app_name'],
                                          :app_password => CROWD_CONFIG['app_password']})
       @service_url = @client.options[:service_url]
-      reset_webmock
+      WebMock.reset!
     end
     should "initialize" do
       @client.should_not be nil
