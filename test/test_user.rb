@@ -3,7 +3,7 @@ require 'helper'
 class TestUser < Test::Unit::TestCase
   context 'A User' do
     setup do
-      @user = Factory.build(:user)
+      @user = FactoryGirl.build(:user)
     end
     should "track dirty properties" do
       @user.dirty_properties.should_not be nil

@@ -197,7 +197,7 @@ class TestClient < Test::Unit::TestCase
       @client.update_user_credential("test", "test").should be true
     end
     should "add/remove user" do
-      localuser = Factory.build(:user)
+      localuser = FactoryGirl.build(:user)
       user = @client.add_user(localuser, "newuserpass")
       user.should_not be nil
       user.username.should == localuser.username
@@ -212,7 +212,7 @@ class TestClient < Test::Unit::TestCase
 
     should "update user attribute" do
       username = "test_update"
-      localuser = Factory.build(:user, :username => username)
+      localuser = FactoryGirl.build(:user, :username => username)
       remoteuser = @client.add_user(localuser, "updatepass")
       @client.update_user_attribute(username, 'givenName', 'UpdatedFirst').should be true
       updateduser = @client.find_user_by_name(username)
@@ -222,7 +222,7 @@ class TestClient < Test::Unit::TestCase
     end
     should "update user custom attribute" do
       username = "test_update"
-      localuser = Factory.build(:user, :username => username)
+      localuser = FactoryGirl.build(:user, :username => username)
       remoteuser = @client.add_user(localuser, "updatepass")
       @client.update_user_attribute(username, 'customAttr', 'customVal').should be true
       remoteuser = @client.find_user_with_attributes_by_name username
@@ -233,7 +233,7 @@ class TestClient < Test::Unit::TestCase
     end
     should "update user attribute array" do
       username = "test_update"
-      localuser = Factory.build(:user, :username => username)
+      localuser = FactoryGirl.build(:user, :username => username)
       remoteuser = @client.add_user(localuser, "updatepass")
       test_array = ["one", "two", "4"]
       @client.update_user_attribute(username, 'arrayTest', test_array).should be true
@@ -249,7 +249,7 @@ class TestClient < Test::Unit::TestCase
     end
     should "update user" do
       username = "test_update"
-      localuser = Factory.build(:user, :username => username)
+      localuser = FactoryGirl.build(:user, :username => username)
       remoteuser = @client.add_user(localuser, "updatepass")
       remoteuser.should_not be nil
       remoteuser.username.should == localuser.username
