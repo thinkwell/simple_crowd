@@ -15,25 +15,23 @@ class TestClient < Test::Unit::TestCase
       assert_instance_of SimpleCrowd::Client, @client
     end
     should "get app token" do
+      @client.app_token.should be nil
+      @client.get_cookie_info
       token = @client.app_token
       token.should_not be nil
       token.length.should == 24
-      
-      assert_requested :post, @service_url
+
+      assert_requested :post, @service_url, :times => 2
     end
     should "refresh app token if invalid" do
-      # Get initial valid token
-      token = @client.app_token
-      info = @client.get_cookie_info
-      info.should_not be nil
-      @client.app_token = token + "invalid"
-      @client.app_token.should == token + "invalid"
+      @client.app_token = "invalid"
+      @client.app_token.should == "invalid"
       # making the token invalid should cause the client to refresh it
       # and get the cookie info successfully
-      @client.get_cookie_info.should == info
+      @client.get_cookie_info
       # Validate refreshed token is same as original token
-      @client.app_token.should == token
-      assert_requested :post, @service_url, :times => 5
+      @client.app_token.should_not == "invalid"
+      assert_requested :post, @service_url, :times => 3
     end
     should "get cookie info" do
       info = @client.get_cookie_info
@@ -103,12 +101,12 @@ class TestClient < Test::Unit::TestCase
       # Invalidate token
       @client.invalidate_user_token(token).should be true
       @client.is_valid_user_token?(token).should be false
-      
+
       assert_requested :post, @service_url, :times => 7
     end
     should "reset user password" do
       # Get real app token before mocking reset call
-      @client.app_token
+      @client.app_token = @client.authenticate_application
       WebMock.disable_net_connect!
 
       response = %Q{<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
@@ -118,7 +116,7 @@ class TestClient < Test::Unit::TestCase
           </soap:Body></soap:Envelope>
       }
       stub_request(:post, @service_url).to_return(:body => response, :status => 200)
-      
+
       @client.reset_user_password("test").should be true
     end
     should "find all user names" do

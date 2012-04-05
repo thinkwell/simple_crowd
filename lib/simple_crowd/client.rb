@@ -2,16 +2,12 @@ module SimpleCrowd
   class Client
 
     attr_reader :options
+    attr_accessor :app_token
 
     def initialize options = {}
       @options = SimpleCrowd.options options
       yield(@options) if block_given?
     end
-
-    def app_token
-      @app_token ||= authenticate_application
-    end
-    attr_writer :app_token
 
     def get_cookie_info
       simple_soap_call :get_cookie_info
@@ -213,37 +209,24 @@ module SimpleCrowd
       # Ordered "in" keys ex. in1, in2, etc. for SOAP ordering
       in_keys = soap_args.length ? (1..soap_args.length).collect {|v| :"in#{v}" } : []
       # Make the SOAP call to the dynamic action
-      response = with_app_token do
-        client.request :"#{action}" do |soap|
-          prepare soap
-          # Pass in all the args as "in" vars
-          soap.body = {:in0 => hash_authenticated_token}.merge(soap_args).merge({:order! => [:in0, *in_keys]})
+      response = client_with_app_token do |client|
+        convert_soap_errors do
+          client.request :"#{action}" do |soap|
+            prepare soap
+            # Pass in all the args as "in" vars
+            soap.body = {:in0 => hash_authenticated_token}.merge(soap_args).merge({:order! => [:in0, *in_keys]})
+          end
         end
       end
       # If a block is given then call it and pass in the response object, otherwise get the default out value
       block_given? ? yield(response) : response.to_hash[:"#{action}_response"][:out]
     end
 
-    def with_app_token retries = 1, &block
-      begin
-        res = convert_soap_errors &block
-      rescue CrowdError => e
-        if retries > 0 && e.type?(:invalid_authorization_token_exception)
-          # Clear token to force a refresh
-          self.app_token = nil
-          retries -= 1
-          retry
-        end
-        raise
-      end
-      res
-    end
-
     def convert_soap_errors
       begin
         old_raise_errors = Savon.raise_errors?
         Savon.raise_errors = true
-        res = yield
+        yield
       rescue Savon::SOAP::Fault => fault
         raise CrowdError.new(fault.to_s, fault)
       rescue Savon::HTTP::Error => e
@@ -251,21 +234,33 @@ module SimpleCrowd
       ensure
         Savon.raise_errors = old_raise_errors
       end
-
-      res
     end
 
-    # Generate new client on every request (Savon bug?)
     def client
-      Savon::Client.new do
+      @client ||= Savon::Client.new do
         wsdl.endpoint = options[:service_url]
         wsdl.namespace = options[:service_ns]
       end
     end
 
+    def client_with_app_token retries = 1
+      begin
+        @app_token ||= authenticate_application
+        yield client
+      rescue CrowdError => e
+        if retries > 0 && e.type?(:invalid_authorization_token_exception)
+          # Clear token to force a refresh
+          @app_token = nil
+          retries -= 1
+          retry
+        end
+        raise
+      end
+    end
+
     # Setup soap object for request
     def prepare soap
-      soap.namespaces.merge! @options[:service_namespaces]
+      soap.namespaces.merge! options[:service_namespaces]
     end
 
     # Take Crowd SOAP attribute format and return a simple ruby hash
