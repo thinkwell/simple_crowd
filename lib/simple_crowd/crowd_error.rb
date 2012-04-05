@@ -1,11 +1,20 @@
 module SimpleCrowd
   class CrowdError < StandardError
-    attr_accessor :response
+    attr_reader :response
     attr_reader :type
-    def initialize string, data = nil
+    attr_reader :original
+
+    def initialize(string, original)
       super string
-      self.response = data unless data.nil?
-      @type = data[:detail].keys.first unless data.nil?
+      @original = original
+
+      if original.is_a?(Savon::SOAP::Fault)
+        @response = original.http
+        @type = original.to_hash[:fault][:detail].keys.first rescue nil
+      elsif original.is_a?(Savon::HTTP::Error)
+        @response = original.http
+        @type = :http
+      end
     end
 
     def type? type

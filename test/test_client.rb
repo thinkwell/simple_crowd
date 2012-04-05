@@ -218,7 +218,7 @@ class TestClient < Test::Unit::TestCase
       updateduser = @client.find_user_by_name(username)
       updateduser.last_name.should == localuser.last_name
       updateduser.first_name.should == 'UpdatedFirst'
-      @client.remove_user "test_update"
+      @client.remove_user username
     end
     should "update user custom attribute" do
       username = "test_update"
@@ -229,7 +229,7 @@ class TestClient < Test::Unit::TestCase
       remoteuser.last_name.should == localuser.last_name
 
       remoteuser[:customAttr].should == 'customVal'
-      @client.remove_user "test_update"
+      @client.remove_user username
     end
     should "update user attribute array" do
       username = "test_update"
@@ -245,7 +245,7 @@ class TestClient < Test::Unit::TestCase
       remoteuser = @client.find_user_with_attributes_by_name username
       remoteuser[:arrayTest].sort.should == test_array.sort
       remoteuser[:arrayTest].include?("two").should be false
-      @client.remove_user "test_update"
+      @client.remove_user username
     end
     should "update user" do
       username = "test_update"
@@ -271,7 +271,7 @@ class TestClient < Test::Unit::TestCase
       remoteuser.first_name.should == "UpdatedFirst"
       remoteuser.last_name.should == "UpdatedLast"
       remoteuser.email.should == localuser.email
-      @client.remove_user "test_update"
+      @client.remove_user username
     end
     should "check if cache enabled" do
       enabled = @client.is_cache_enabled?

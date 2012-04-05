@@ -5,13 +5,9 @@ module SimpleCrowd
 
     def initialize options = {}
       @options = SimpleCrowd.options options
-
-      # TODO: Fix error handling
-      # Errors do not contained Exception info so we'll handle the errors ourselves
-      # Savon::Response.raise_errors = false
-      # @client = Savon::Client.new @options[:service_url]
       yield(@options) if block_given?
     end
+
     def app_token
       @app_token ||= authenticate_application
     end
@@ -27,14 +23,15 @@ module SimpleCrowd
     end
 
     def authenticate_application(name = @options[:app_name], password = @options[:app_password])
-      response = client.authenticate_application! do |soap|
-        prepare soap
-        soap.body = {:in0 => {
-          'auth:name' => name,
-          'auth:credential' => {'auth:credential' => password}
-        }.merge(no_validation_factors)}
+      response = convert_soap_errors do
+        client.request :authenticate_application do |soap|
+          prepare soap
+          soap.body = {:in0 => {
+            'auth:name' => name,
+            'auth:credential' => {'auth:credential' => password}
+          }.merge(no_validation_factors)}
+        end
       end
-      raise CrowdError.new(response.soap_fault, response.to_hash[:fault]) if response.soap_fault?
       response.to_hash[:authenticate_application_response][:out][:token]
     end
 
@@ -65,7 +62,7 @@ module SimpleCrowd
     end
 
     def is_valid_user_token? token, factors = nil
-      factors = prepare_validation_factors(factors) unless factors.nil?
+      factors = prepare_validation_factors(factors)
       simple_soap_call :is_valid_principal_token, token, factors
     end
 
@@ -174,7 +171,7 @@ module SimpleCrowd
       simple_soap_call :update_principal_credential, user,
                        {'auth:credential' => credential, 'auth:encryptedCredential' => encrypted} do |res|
         !res.soap_fault? && res.to_hash.key?(:update_principal_credential_response)
-      end 
+      end
     end
 
     # Only supports single value attributes
@@ -206,7 +203,7 @@ module SimpleCrowd
     end
 
     private
-    
+
     # Simplify the duplicated soap calls across methods
     # @param [Symbol] action the soap action to call
     # @param data the list of args to pass to the server as "in" args (in1, in2, etc.)
@@ -217,7 +214,7 @@ module SimpleCrowd
       in_keys = soap_args.length ? (1..soap_args.length).collect {|v| :"in#{v}" } : []
       # Make the SOAP call to the dynamic action
       response = with_app_token do
-        client.send :"#{action}!" do |soap|
+        client.request :"#{action}" do |soap|
           prepare soap
           # Pass in all the args as "in" vars
           soap.body = {:in0 => hash_authenticated_token}.merge(soap_args).merge({:order! => [:in0, *in_keys]})
@@ -229,10 +226,7 @@ module SimpleCrowd
 
     def with_app_token retries = 1, &block
       begin
-        Savon::Response.raise_errors = false
-        response = block.call
-        raise CrowdError.new(response.soap_fault, response.to_hash[:fault]) if response.soap_fault?
-        return response
+        res = convert_soap_errors &block
       rescue CrowdError => e
         if retries > 0 && e.type?(:invalid_authorization_token_exception)
           # Clear token to force a refresh
@@ -241,19 +235,36 @@ module SimpleCrowd
           retry
         end
         raise
-      ensure
-        Savon::Response.raise_errors = true
       end
+      res
+    end
+
+    def convert_soap_errors
+      begin
+        old_raise_errors = Savon.raise_errors?
+        Savon.raise_errors = true
+        res = yield
+      rescue Savon::SOAP::Fault => fault
+        raise CrowdError.new(fault.to_s, fault)
+      rescue Savon::HTTP::Error => e
+        raise CrowdError.new(e.to_s)
+      ensure
+        Savon.raise_errors = old_raise_errors
+      end
+
+      res
     end
 
     # Generate new client on every request (Savon bug?)
     def client
-      Savon::Client.new @options[:service_url]
+      Savon::Client.new do
+        wsdl.endpoint = options[:service_url]
+        wsdl.namespace = options[:service_ns]
+      end
     end
 
     # Setup soap object for request
     def prepare soap
-      soap.namespace = @options[:service_ns]
       soap.namespaces.merge! @options[:service_namespaces]
     end
 
@@ -275,7 +286,7 @@ module SimpleCrowd
 
     def prepare_validation_factors factors
       {'auth:validationFactor' =>
-              factors.inject([]) {|arr, factor| arr << {'auth:name' => factor[0], 'auth:value' => factor[1]} }
+              (factors || []).inject([]) {|arr, factor| arr << {'auth:name' => factor[0], 'auth:value' => factor[1]} }
       }
     end
 
