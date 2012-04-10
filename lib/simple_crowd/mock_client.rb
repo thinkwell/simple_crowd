@@ -9,6 +9,8 @@ module SimpleCrowd
       end
     end
 
+    attr_accessor :app_token
+
     @users = []
     @tokens = []
     @groups = []
@@ -19,7 +21,6 @@ module SimpleCrowd
     def authenticate_application(name = nil, password = nil)
       "MOCKAPPTOKEN"
     end
-    alias_method :app_token, :authenticate_application
 
     def authenticate_user name, password, factors = nil
       (user = find_user_by_name(name)) && user.password && user.password == password ? new_user_token(name) : nil
