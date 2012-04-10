@@ -2,15 +2,22 @@ module SimpleCrowd
   class Client
 
     attr_reader :options
-    attr_accessor :app_token
+    attr_accessor :app_token, :cache_store
 
     def initialize options = {}
       @options = SimpleCrowd.options options
       yield(@options) if block_given?
+      self.cache_store = @options.delete(:cache_store)
     end
 
     def get_cookie_info
-      simple_soap_call :get_cookie_info
+      @cookie_info ||= cache.fetch(cache_key(:cookie_info)) do
+        # Remove custom SOAP attributes from the strings
+        simple_soap_call(:get_cookie_info).inject({}) do |cookie_info, (key, val)|
+          cookie_info[key] = val ? val.to_s : val
+          cookie_info
+        end
+      end
     end
 
     def get_granted_authorities
@@ -28,7 +35,7 @@ module SimpleCrowd
           }.merge(no_validation_factors)}
         end
       end
-      response.to_hash[:authenticate_application_response][:out][:token]
+      response.to_hash[:authenticate_application_response][:out][:token].to_s
     end
 
     # Authenticate user by name/pass and retrieve login token
@@ -198,6 +205,26 @@ module SimpleCrowd
       end
     end
 
+    def app_token
+      @app_token ||= cache.read(cache_key(:app_token))
+    end
+
+    def app_token=(token)
+      cache.write(cache_key(:app_token), token)
+      @app_token = token
+    end
+
+    def cache_store=(store)
+      @cache_store = store || Cache::NullStore.new
+    end
+    alias_method :cache, :cache_store
+
+    def reset_cache
+      [:app_token, :cookie_info].each do |key|
+        cache.delete(cache_key(key))
+      end
+    end
+
     private
 
     # Simplify the duplicated soap calls across methods
@@ -244,13 +271,13 @@ module SimpleCrowd
     end
 
     def client_with_app_token retries = 1
+      self.app_token = authenticate_application unless self.app_token
       begin
-        @app_token ||= authenticate_application
         yield client
       rescue CrowdError => e
         if retries > 0 && e.type?(:invalid_authorization_token_exception)
-          # Clear token to force a refresh
-          @app_token = nil
+          # Refresh the app token
+          self.app_token = authenticate_application
           retries -= 1
           retry
         end
@@ -300,5 +327,8 @@ module SimpleCrowd
       {'auth:validationFactors' => {}, :attributes! => {'auth:validationFactors' => {'xsi:nil' => true}}}
     end
 
+    def cache_key(key)
+      "#{@options[:cache_prefix]}#{key}"
+    end
   end
 end

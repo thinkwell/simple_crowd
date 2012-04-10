@@ -3,7 +3,7 @@ require 'helper'
 class TestSimpleCrowd < Test::Unit::TestCase
   context "with default keys" do
     setup do
-      @default_keys = [:service_url, :service_ns, :service_namespaces, :app_name, :app_password]
+      @default_keys = [:service_url, :service_ns, :service_namespaces, :app_name, :app_password, :cache_prefix]
     end
     should "return options" do
       options = SimpleCrowd.options

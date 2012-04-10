@@ -8,6 +8,7 @@ require 'simple_crowd/user'
 require 'simple_crowd/group'
 require 'simple_crowd/client'
 require 'simple_crowd/mappers/soap_attributes'
+require 'simple_crowd/cache/null_store'
 Dir['simple_crowd/mappers/*.rb'].each {|file| require File.basename(file, File.extname(file)) }
 
 module SimpleCrowd
@@ -36,7 +37,8 @@ module SimpleCrowd
       @default_crowd_options ||= {
         :service_url => "http://localhost:8095/crowd/",
         :app_name => "crowd",
-        :app_password => ""
+        :app_password => "",
+        :cache_prefix => "simple_crowd.",
       }
       defined?(IRB) ? @default_crowd_options.merge(config_file_options) : @default_crowd_options
     end
