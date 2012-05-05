@@ -35,7 +35,7 @@ module SimpleCrowd
           }.merge(no_validation_factors)}
         end
       end
-      response.to_hash[:authenticate_application_response][:out][:token].to_s
+      clean_response(response.to_hash[:authenticate_application_response][:out])[:token].to_s.dup
     end
 
     # Authenticate user by name/pass and retrieve login token
@@ -237,9 +237,23 @@ module SimpleCrowd
           end
         end
       end
-      response_hash = response.to_hash[:"#{action}_response"][:out]
+      response_hash = clean_response response.to_hash[:"#{action}_response"][:out]
       # If a block is given then call it and pass in the response, otherwise get the default out value
       block_given? ? yield(response_hash) : response_hash
+    end
+
+    # Savon returns strings with embedded SOAP/XML attributes.  These don't serialize
+    # well and users shouldn't care that we use SOAP.  Remove these attributes.
+    def clean_response(r)
+      case r
+      when Hash
+        r.each {|k,v| r[k] = clean_response(v)}
+      when Array
+        r = r.map {|v| clean_response(v)}
+      when Nori::StringWithAttributes
+        r = r.to_s
+      end
+      r
     end
 
     def convert_soap_errors
