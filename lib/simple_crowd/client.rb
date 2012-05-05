@@ -59,9 +59,8 @@ module SimpleCrowd
     # NOTE: call will return true even if token is invalid
     # @return [Boolean] success (does not guarantee valid token)
     def invalidate_user_token token
-      simple_soap_call :invalidate_principal_token, token do |res|
-        !res.soap_fault? && res.to_hash.key?(:invalidate_principal_token_response)
-      end
+      simple_soap_call :invalidate_principal_token, token
+      true
     end
 
     def is_valid_user_token? token, factors = nil
@@ -86,27 +85,23 @@ module SimpleCrowd
     end
 
     def update_group group, description, active
-      simple_soap_call :update_group, group, description, active  do |res|
-        !res.soap_fault? && res.to_hash.key?(:update_group_response)
-      end
+      simple_soap_call :update_group, group, description, active
+      true
     end
 
     def add_user_to_group user, group
-      simple_soap_call :add_principal_to_group, user, group do |res|
-        !res.soap_fault? && res.to_hash.key?(:add_principal_to_group_response)
-      end
+      simple_soap_call :add_principal_to_group, user, group
+      true
     end
 
     def remove_user_from_group user, group
-      simple_soap_call :remove_principal_from_group, user, group do |res|
-        !res.soap_fault? && res.to_hash.key?(:remove_principal_from_group_response)
-      end
+      simple_soap_call :remove_principal_from_group, user, group
+      true
     end
 
     def reset_user_password name
-      simple_soap_call :reset_principal_credential, name do |res|
-        !res.soap_fault? && res.to_hash.key?(:reset_principal_credential_response)
-      end
+      simple_soap_call :reset_principal_credential, name
+      true
     end
 
     def find_all_user_names
@@ -165,16 +160,14 @@ module SimpleCrowd
     end
 
     def remove_user name
-      simple_soap_call :remove_principal, name do |res|
-        !res.soap_fault? && res.to_hash.key?(:remove_principal_response)
-      end
+      simple_soap_call :remove_principal, name
+      true
     end
 
     def update_user_credential user, credential, encrypted = false
       simple_soap_call :update_principal_credential, user,
-                       {'auth:credential' => credential, 'auth:encryptedCredential' => encrypted} do |res|
-        !res.soap_fault? && res.to_hash.key?(:update_principal_credential_response)
-      end
+                       {'auth:credential' => credential, 'auth:encryptedCredential' => encrypted}
+      true
     end
 
     # Only supports single value attributes
@@ -185,9 +178,8 @@ module SimpleCrowd
     def update_user_attribute user, name, value
       return unless (name.is_a?(String) || name.is_a?(Symbol)) && (value.is_a?(String) || value.is_a?(Array))
       soap_attr = SimpleCrowd::Mappers::SoapAttributes.produce({name => value})
-      simple_soap_call :update_principal_attribute, user, soap_attr['int:SOAPAttribute'][0] do |res|
-        !res.soap_fault? && res.to_hash.key?(:update_principal_attribute_response)
-      end
+      simple_soap_call :update_principal_attribute, user, soap_attr['int:SOAPAttribute'][0]
+      true
     end
     alias_method :add_user_attribute, :update_user_attribute
 
@@ -245,8 +237,9 @@ module SimpleCrowd
           end
         end
       end
-      # If a block is given then call it and pass in the response object, otherwise get the default out value
-      block_given? ? yield(response) : response.to_hash[:"#{action}_response"][:out]
+      response_hash = response.to_hash[:"#{action}_response"][:out]
+      # If a block is given then call it and pass in the response, otherwise get the default out value
+      block_given? ? yield(response_hash) : response_hash
     end
 
     def convert_soap_errors
