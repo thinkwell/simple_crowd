@@ -2,6 +2,10 @@ require 'helper'
 
 class TestClient < Test::Unit::TestCase
   CROWD_CONFIG = YAML.load_file($CROWD_CONFIG_PATH)['crowd']
+  TEST_USER="test"
+  TEST_PASSWORD="test"
+  TEST_GROUP="Testing"
+  TEST_EMAIL="test@testing.com"
   context "A Client" do
     setup do
       @client = SimpleCrowd::Client.new({:service_url => CROWD_CONFIG['service_url'],
@@ -42,31 +46,31 @@ class TestClient < Test::Unit::TestCase
       assert_requested :post, @service_url, :times => 2
     end
     should "authenticate user" do
-      token = @client.authenticate_user "test", "test"
+      token = @client.authenticate_user TEST_USER, TEST_PASSWORD
       token.should_not be nil
       token.length.should == 24
 
       assert_requested :post, @service_url, :times => 2
     end
     should "authenticate user with validation factors" do
-      token = @client.authenticate_user "test", "test", {:test_factor => "test1234"}
+      token = @client.authenticate_user TEST_USER, TEST_PASSWORD, {:test_factor => "test1234"}
       token.should_not be nil
       token.length.should == 24
 
       assert_requested :post, @service_url, :times => 2
     end
     should "create user token without password" do
-      token = @client.create_user_token "test"
+      token = @client.create_user_token TEST_USER
       token.should_not be nil
       token.length.should == 24
 
       assert_requested :post, @service_url, :times => 2
     end
     should "return same user token with or without password" do
-      token_with_pass = @client.authenticate_user "test", "test"
+      token_with_pass = @client.authenticate_user TEST_USER, TEST_PASSWORD
       token_with_pass.should_not be nil
       token_with_pass.length.should == 24
-      token_without_pass = @client.create_user_token "test"
+      token_without_pass = @client.create_user_token TEST_USER
       token_without_pass.should_not be nil
       token_with_pass.length.should == 24
 
@@ -75,7 +79,7 @@ class TestClient < Test::Unit::TestCase
       assert_requested :post, @service_url, :times => 3
     end
     should "validate user token" do
-      token = @client.authenticate_user "test", "test"
+      token = @client.authenticate_user TEST_USER, TEST_PASSWORD
       valid = @client.is_valid_user_token? token
       valid.should be true
       invalid = @client.is_valid_user_token?(token + "void")
@@ -83,15 +87,15 @@ class TestClient < Test::Unit::TestCase
       assert_requested :post, @service_url, :times => 4
     end
     should "validate user token with factors" do
-      token = @client.authenticate_user "test", "test", {"Random-Number" => 6375}
+      token = @client.authenticate_user TEST_USER, TEST_PASSWORD, {"Random-Number" => 6375}
       @client.is_valid_user_token?(token).should be false
       @client.is_valid_user_token?(token, {"Random-Number" => 6375}).should be true
-      token2 = @client.authenticate_user "test", "test"
+      token2 = @client.authenticate_user TEST_USER, TEST_PASSWORD
       @client.is_valid_user_token?(token2, {"Random-Number" => 48289}).should be false
       assert_requested :post, @service_url, :times => 6
     end
     should "invalidate user token (logout)" do
-      token = @client.authenticate_user "test", "test"
+      token = @client.authenticate_user TEST_USER, TEST_PASSWORD
       @client.is_valid_user_token?(token).should be true
 
       # Invalidate nonexistant token
@@ -117,24 +121,24 @@ class TestClient < Test::Unit::TestCase
       }
       stub_request(:post, @service_url).to_return(:body => response, :status => 200)
 
-      @client.reset_user_password("test").should be true
+      @client.reset_user_password(TEST_USER).should be true
     end
     should "find all user names" do
       names = @client.find_all_user_names
       names.should_not be nil
       names.is_a?(Array).should be true
       names.empty?.should be false
-      names.include?("test").should be true
+      names.include?(TEST_USER).should be true
     end
     should "find user by name" do
-      user = @client.find_user_by_name "test"
+      user = @client.find_user_by_name TEST_USER
       user.should_not be nil
       [:id, :username, :description, :active, :directory_id, :first_name, :last_name, :email].each {|v| user.key?(v).should be true}
       [:id, :username, :active, :directory_id].each {|v| user[v].should_not be nil}
       assert_requested :post, @service_url, :times => 2
     end
     should "find user by token" do
-      token = @client.authenticate_user "test", "test"
+      token = @client.authenticate_user TEST_USER, TEST_PASSWORD
       user = @client.find_user_by_token token
       user.should_not be nil
       user.first_name.should == "Test"
@@ -142,22 +146,22 @@ class TestClient < Test::Unit::TestCase
       assert_requested :post, @service_url, :times => 3
     end
     should "find username by token" do
-      token = @client.authenticate_user "test", "test"
+      token = @client.authenticate_user TEST_USER, TEST_PASSWORD
       user = @client.find_username_by_token token
       user.should_not be nil
       user.length.should > 0
-      user.should == "test"
+      user.should == TEST_USER
 
       assert_requested :post, @service_url, :times => 3
     end
     should "find user by email" do
-      user = @client.find_user_by_email "test@testing.com"
+      user = @client.find_user_by_email TEST_EMAIL
       user.should_not be nil
       user.first_name.should == "Test"
       user.last_name.should == "User"
 
       # partial searches should return nothing
-      user = @client.find_user_by_email "test"
+      user = @client.find_user_by_email TEST_EMAIL
       user.should be nil
 
       assert_requested :post, @service_url, :times => 3
@@ -170,10 +174,10 @@ class TestClient < Test::Unit::TestCase
       assert_requested :post, @service_url, :times => 2
     end
     should "search users" do
-      users = @client.search_users({'principal.email' => "test@testing.com"})
+      users = @client.search_users({'principal.email' => TEST_EMAIL})
       users.should_not be nil
       users.empty?.should_not be true
-      users.all?{|u| u.email == "test@testing.com" }.should be true
+      users.all?{|u| u.email == TEST_EMAIL }.should be true
 
       users = @client.search_users({'principal.fullname' => "Test"})
       users.should_not be nil
@@ -188,11 +192,11 @@ class TestClient < Test::Unit::TestCase
       assert_requested :post, @service_url, :times => 2
     end
     should "update user credential" do
-      @client.authenticate_user("test", "test").should_not be nil
-      @client.update_user_credential("test", "testupdate").should be true
-      lambda {@client.authenticate_user("test", "test")}.should raise_error
-      @client.authenticate_user("test", "testupdate").should_not be nil
-      @client.update_user_credential("test", "test").should be true
+      @client.authenticate_user(TEST_USER, TEST_PASSWORD).should_not be nil
+      @client.update_user_credential(TEST_USER, "testupdate").should be true
+      lambda {@client.authenticate_user(TEST_USER, TEST_PASSWORD)}.should raise_error
+      @client.authenticate_user(TEST_USER, "testupdate").should_not be nil
+      @client.update_user_credential(TEST_USER, TEST_PASSWORD).should be true
     end
     should "add/remove user" do
       localuser = FactoryGirl.build(:user)
@@ -284,7 +288,7 @@ class TestClient < Test::Unit::TestCase
       assert_requested :post, @service_url, :times => 2
     end
     should "find group by name" do
-      group = @client.find_group_by_name("Testing")
+      group = @client.find_group_by_name(TEST_GROUP)
       group.should_not be nil
       assert_requested :post, @service_url, :times => 2
     end
@@ -293,13 +297,13 @@ class TestClient < Test::Unit::TestCase
       names.should_not be nil
       names.is_a?(Array).should be true
       names.empty?.should be false
-      names.include?("Testing").should be true
+      names.include?(TEST_GROUP).should be true
     end
     should "add/remove user from group" do
-      @client.add_user_to_group("test", "Testing").should be true
-      @client.is_group_member?("Testing", "test").should be true
-      @client.remove_user_from_group("test", "Testing").should be true
-      @client.is_group_member?("Testing", "test").should be false
+      @client.add_user_to_group(TEST_USER, TEST_GROUP).should be true
+      @client.is_group_member?(TEST_GROUP, TEST_USER).should be true
+      @client.remove_user_from_group(TEST_USER, TEST_GROUP).should be true
+      @client.is_group_member?(TEST_GROUP, TEST_USER).should be false
       assert_requested :post, @service_url, :times => 5
     end
 #    should "add/remove attribute from group" do
@@ -307,17 +311,17 @@ class TestClient < Test::Unit::TestCase
 #      @client.remove_attribute_from_group("test", "tmpattribute").should be true
 #    end
     should "update group" do
-      @client.find_group_by_name("Testing").active.should be true
-      @client.update_group("Testing", "Test Description", false).should be true
-      updated_group = @client.find_group_by_name("Testing")
+      @client.find_group_by_name(TEST_GROUP).active.should be true
+      @client.update_group(TEST_GROUP, "Test Description", false).should be true
+      updated_group = @client.find_group_by_name(TEST_GROUP)
       updated_group.active.should be false
       updated_group.description.should == "Test Description"
-      @client.update_group("Testing", "", true).should be true
+      @client.update_group(TEST_GROUP, "", true).should be true
     end
     should "check if user is group member" do
-      @client.add_user_to_group("test", "Testing").should be true
-      @client.is_group_member?("Testing", "test").should be true
-      @client.is_group_member?("nonexistantgroup", "test").should be false
+      @client.add_user_to_group(TEST_USER, TEST_GROUP).should be true
+      @client.is_group_member?(TEST_GROUP, TEST_USER).should be true
+      @client.is_group_member?("nonexistantgroup", TEST_USER).should be false
       assert_requested :post, @service_url, :times => 4
     end
     should "accept cached app token" do
