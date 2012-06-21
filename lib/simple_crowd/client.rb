@@ -263,15 +263,15 @@ module SimpleCrowd
 
     def convert_soap_errors
       begin
-        old_raise_errors = Savon.raise_errors?
-        Savon.raise_errors = true
+        old_raise_errors = client.config.raise_errors
+        client.config.raise_errors = true
         yield
       rescue Savon::SOAP::Fault => fault
         raise CrowdError.new(fault.to_s, fault)
       rescue Savon::HTTP::Error => e
         raise CrowdError.new(e.to_s)
       ensure
-        Savon.raise_errors = old_raise_errors
+        client.config.raise_errors = old_raise_errors
       end
     end
 
