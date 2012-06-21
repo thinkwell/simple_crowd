@@ -76,6 +76,11 @@ module SimpleCrowd
       simple_soap_call :is_group_member, group, user
     end
 
+    def find_group_memberships user
+      groups = simple_soap_call :find_group_memberships, user
+      groups[:string] unless groups.nil?
+    end
+
     def find_group_by_name name
       SimpleCrowd::Group.parse_from :soap, simple_soap_call(:find_group_by_name, name)
     end
