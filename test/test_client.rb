@@ -2,10 +2,10 @@ require 'helper'
 
 class TestClient < Test::Unit::TestCase
   CROWD_CONFIG = YAML.load_file($CROWD_CONFIG_PATH)['crowd']
-  TEST_USER="test"
-  TEST_PASSWORD="test"
-  TEST_GROUP="Testing"
-  TEST_EMAIL="test@testing.com"
+  TEST_USER = CROWD_CONFIG['test_user']
+  TEST_PASSWORD = CROWD_CONFIG['test_pass']
+  TEST_GROUP = CROWD_CONFIG['test_group']
+  TEST_EMAIL = CROWD_CONFIG['test_email']
   context "A Client" do
     setup do
       @client = SimpleCrowd::Client.new({:service_url => CROWD_CONFIG['service_url'],
@@ -133,8 +133,9 @@ class TestClient < Test::Unit::TestCase
     should "find user by name" do
       user = @client.find_user_by_name TEST_USER
       user.should_not be nil
-      [:id, :username, :description, :active, :directory_id, :first_name, :last_name, :email].each {|v| user.key?(v).should be true}
-      [:id, :username, :active, :directory_id].each {|v| user[v].should_not be nil}
+      [:id, :username, :active, :directory_id, :first_name, :last_name, :email].each do |key|
+        user.send(key).should_not be nil
+      end
       assert_requested :post, @service_url, :times => 2
     end
     should "find user by token" do
@@ -161,7 +162,7 @@ class TestClient < Test::Unit::TestCase
       user.last_name.should == "User"
 
       # partial searches should return nothing
-      user = @client.find_user_by_email TEST_EMAIL
+      user = @client.find_user_by_email TEST_EMAIL[0..-5]
       user.should be nil
 
       assert_requested :post, @service_url, :times => 3

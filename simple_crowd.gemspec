@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency(%q<savon>, [">= 1.0.0"])
-  s.add_runtime_dependency(%q<hashie>, [">= 1.0.0"])
 
   s.add_development_dependency(%q<bundler>, [">= 1.0.21"])
   s.add_development_dependency(%q<rake>, [">= 0"])

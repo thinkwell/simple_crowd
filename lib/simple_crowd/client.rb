@@ -82,7 +82,7 @@ module SimpleCrowd
     end
 
     def find_group_by_name name
-      SimpleCrowd::Group.parse_from :soap, simple_soap_call(:find_group_by_name, name)
+      SimpleCrowd::Group.from_soap simple_soap_call(:find_group_by_name, name)
     end
 
     def find_all_group_names
@@ -114,15 +114,15 @@ module SimpleCrowd
     end
 
     def find_user_by_name name
-      SimpleCrowd::User.parse_from :soap, simple_soap_call(:find_principal_by_name, name) rescue nil
+      SimpleCrowd::User.from_soap simple_soap_call(:find_principal_by_name, name) rescue nil
     end
 
     def find_user_with_attributes_by_name name
-      SimpleCrowd::User.parse_from :soap, simple_soap_call(:find_principal_with_attributes_by_name, name) rescue nil
+      SimpleCrowd::User.from_soap simple_soap_call(:find_principal_with_attributes_by_name, name) rescue nil
     end
 
     def find_user_by_token token
-      SimpleCrowd::User.parse_from :soap, simple_soap_call(:find_principal_by_token, token) rescue nil
+      SimpleCrowd::User.from_soap simple_soap_call(:find_principal_by_token, token) rescue nil
     end
 
     def find_username_by_token token
@@ -145,7 +145,7 @@ module SimpleCrowd
       users = simple_soap_call :search_principals, soap_restrictions rescue []
       return [] if users.nil? || users[:soap_principal].nil?
       users = users[:soap_principal].is_a?(Array) ? users[:soap_principal] : [users[:soap_principal]]
-      users.map{|u| SimpleCrowd::User.parse_from :soap, u}
+      users.map{|u| SimpleCrowd::User.from_soap u}
     end
 
     def add_user user, credential
@@ -153,15 +153,16 @@ module SimpleCrowd
       [:email, :first_name, :last_name].each do |k|
         user.send(:"#{k}=", "") if user.send(k).nil?
       end
-      soap_user = user.map_to :soap
+      soap_user = user.to_soap
       # We don't use these attributes when creating
       soap_user.delete(:id)
       soap_user.delete(:directory_id)
       # Add blank attributes if missing
 
       # Declare require namespaces
-      soap_user = soap_user.inject({}) {|hash, (k, v)| hash["int:#{k}"] = v;hash}
-      SimpleCrowd::User.parse_from :soap, simple_soap_call(:add_principal, soap_user, {'auth:credential' => credential, 'auth:encryptedCredential' => false})
+      soap_user = add_soap_namespace(soap_user)
+
+      SimpleCrowd::User.from_soap simple_soap_call(:add_principal, soap_user, {'auth:credential' => credential, 'auth:encryptedCredential' => false})
     end
 
     def remove_user name
@@ -182,8 +183,8 @@ module SimpleCrowd
     # @param value [String] of attribute to update
     def update_user_attribute user, name, value
       return unless (name.is_a?(String) || name.is_a?(Symbol)) && (value.is_a?(String) || value.is_a?(Array))
-      soap_attr = SimpleCrowd::Mappers::SoapAttributes.produce({name => value})
-      simple_soap_call :update_principal_attribute, user, soap_attr['int:SOAPAttribute'][0]
+      soap_attr = add_soap_namespace({:name => name, :values => {:string => value}})
+      simple_soap_call :update_principal_attribute, user, soap_attr
       true
     end
     alias_method :add_user_attribute, :update_user_attribute
@@ -196,9 +197,8 @@ module SimpleCrowd
       return if attrs_to_update.empty?
 
       attrs_to_update.each do |a|
-        prop = SimpleCrowd::User.property_by_name a
-        soap_prop = prop.maps[:soap].nil? ? prop : prop.maps[:soap]
-        self.update_user_attribute user.username, soap_prop, user.send(a)
+        key = SimpleCrowd::User.soap_key_for(a)
+        self.update_user_attribute user.username, key, user.send(a)
       end
     end
 
@@ -341,6 +341,20 @@ module SimpleCrowd
 
     def cache_key(key)
       "#{@options[:cache_prefix]}#{key}"
+    end
+
+    def add_soap_namespace(enum)
+      if enum.is_a?(Hash)
+        enum.inject({}) do |h, (k, v)|
+          k = k == :string ? "wsdl:#{k}" : "int:#{k}"
+          h[k] = v.is_a?(Enumerable) ? add_soap_namespace(v) : v
+          h
+        end
+      else
+        enum.map do |v|
+          v.is_a?(Enumerable) ? add_soap_namespace(v) : v
+        end
+      end
     end
   end
 end

@@ -4,3 +4,8 @@ crowd:
   service_url: http://www.crowdserver.com:8095/crowd/
   app_name: crowdapp
   app_password: testpass
+
+  test_user: 'test'
+  test_pass: 'test'
+  test_group: 'Testing'
+  test_email: 'testing@testing.com'

@@ -1,10 +1,11 @@
 module SimpleCrowd
   class Group < CrowdEntity
-    property :id
-    property :name
+    property :id, :immutable => true
+    property :name, :immutable => true
+    property :directory_id, :immutable => true
+
     property :active, :default => true
     property :description
-    property :directory_id
 
     property :members
   end

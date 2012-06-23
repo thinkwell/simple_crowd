@@ -1,161 +1,66 @@
 module SimpleCrowd
-  class ExtendedProperty < Hashie::Dash
-    property :name
-    property :default
-    property :attribute
-    property :immutable
-    property :maps, :default => {}
-    property :mappers, :default => {}
-    def immutable?; @immutable; end
-    def is_attribute?; @attribute end
-  end
-  class CrowdEntity < Hashie::Mash
-    def initialize(data = {}, notused = nil)
-      self.class.properties.each do |prop|
-        self.send("#{prop.name}=", self.class.defaults[prop.name.to_sym])
+  class CrowdEntity
+
+    def initialize(attrs={})
+      self.class.defaults.each do |key, val|
+        send(:"#{key.to_s}=", val)
       end
-      attrs = data[:attributes].nil? ? [] : data[:attributes].keys
-      data.merge! data[:attributes] unless attrs.empty?
-      data.delete :attributes
-      data.each_pair do |att, value|
-        #ruby_att = att_to_ruby att
-        ruby_att = att
-        real_att = real_key_for ruby_att
-        (@attributes ||= []) << real_att if attrs.include?(att)
-        prop = self.class.property_by_name(real_att)
-        self.send("#{real_att}=", value) unless prop.nil?
-        self[real_att] = value if prop.nil?
+
+      attrs.each do |key, val|
+        send(:"#{key.to_s}=", val) if self.respond_to?("#{key.to_s}=", true)
       end
-      # We just initialized the attributes so clear the dirty status
       dirty_properties.clear
     end
-    def self.property(property_name, options = {})
+
+    def self.property(property_name, opts={})
       property_name = property_name.to_sym
 
-      maps = options.inject({}) {|map, (key, value)| map[$1.to_sym] = value.to_sym if key.to_s =~ /^map_(.*)$/; map }
-      mappers = options.inject({}) {|map, (key, value)| map[$1.to_sym] = value if key.to_s =~ /^mapper_(.*)$/; map }
-      options.reject! {|key, val| key.to_s =~ /^map_(.*)$/ || key.to_s =~ /^mapper_(.*)$/ }
-      (@properties ||= []) << ExtendedProperty.new({:name => property_name, :maps => maps, :mappers => mappers}.merge(options))
-      (@attributes ||= []) << property_name if options[:attribute]
+      @properties ||= []
+      @properties << property_name unless @properties.include?(property_name)
 
-      class_eval <<-RUBY
+      class_eval <<-PROPERTY, __FILE__, __LINE__ + 1
         def #{property_name}
-          self[:#{property_name}]
+          @#{property_name}
         end
         def #{property_name}=(val)
-          (dirty_properties << :#{property_name}).uniq! unless val == self[:#{property_name}]
-          self[:#{property_name}] = val
+          (dirty_properties << :#{property_name}).uniq! unless val == @#{property_name}
+          @#{property_name} = val
         end
-      RUBY
+      PROPERTY
 
-      maps.each_value do |v|
-        alias_method v, property_name
-        alias_method :"#{v}=", :"#{property_name}="
+      if opts[:immutable]
+        private :"#{property_name}="
+      end
+
+      if opts[:map_soap]
+        v = :"#{opts[:map_soap]}"
+        @soap_to_property_map ||= {}
+        @property_to_soap_map ||= {}
+        @soap_to_property_map[v] = property_name
+        @property_to_soap_map[property_name] = v
+      end
+
+      if opts[:attribute]
+        @attributes ||= []
+        @attributes << property_name
+      end
+
+      if opts[:default]
+        @defaults ||= {}
+        @defaults[property_name] = opts[:default]
       end
     end
 
     def self.properties
-      properties = []
-      ancestors.each do |elder|
-        if elder.instance_variable_defined?("@properties")
-          properties << elder.instance_variable_get("@properties")
-        end
-      end
-
-      properties.reverse.flatten
+      @properties.freeze
     end
 
-    def self.property_by_name(property_name)
-      property_name = property_name.to_sym
-      properties.detect {|p| p.name == property_name || p.maps.value?(property_name)}
-    end
-
-    def self.properties_by_name(property_name)
-      property_name = property_name.to_sym
-      properties.select {|p| p.name == property_name || p.maps.value?(property_name)}
-    end
-
-    def self.property?(prop)
-      !property_by_name(prop.to_sym).nil?
+    def self.attributes
+      @attributes.freeze
     end
 
     def self.defaults
-      properties.inject({}) {|hash, prop| hash[prop.name] = prop['default'] unless prop['default'].nil?; hash }
-    end
-
-    def self.attribute_mappers hash = nil
-      @attribute_mappers ||= {:soap => SimpleCrowd::Mappers::SoapAttributes}
-      unless hash.nil?
-        @attribute_mappers.merge! hash if hash.is_a? Hash
-      end
-      @attribute_mappers
-    end
-
-    def self.map_for type
-      type = type.to_sym
-      properties.inject({}) {|hash, prop| hash[prop.name] = prop.maps[type] unless prop.maps[type].nil?; hash }
-    end
-
-    def self.map_to type, entity
-      map = map_for type
-      attrs = {}
-      out = entity.inject({}) do |hash, (key, val)|
-        key = key.to_sym
-        catch(:skip_prop) do
-        unless val.nil?
-          mapped_key = map[key].nil? ? key : map[key]
-          prop = property_by_name key
-          if prop.nil?
-            attrs[mapped_key] = val
-            throw :skip_prop
-          end
-          mapper = prop.mappers[type]
-          #val = val.inject({}) {|attrs, (k, v)| attrs[property_by_name(k).maps[type]]= v unless v.nil?; attrs} if key == :attributes
-          val = mapper.produce val unless mapper.nil?
-          if prop.attribute || entity.attributes_keys.include?(key)
-            attrs[mapped_key] = val
-          else
-            hash[mapped_key] = val
-          end
-        end
-        end
-        hash
-      end
-      out[:attributes] = attribute_mappers[type].produce attrs
-      out
-    end
-
-    def self.parse_from type, entity
-      entity[:attributes] = attribute_mappers[type].parse entity[:attributes]
-      parsed_entity = entity.inject({}) do |hash, (key, val)|
-        prop = property_by_name key
-        unless prop.nil?
-          mapper = prop.mappers[type]
-          val = mapper.parse val unless mapper.nil?
-        end
-        hash[key] = val
-        hash
-      end
-      self.new(parsed_entity)
-    end
-
-    def map_to type
-      self.class.map_to type, self
-    end
-
-    def attributes_keys
-      keys = []
-      self.class.ancestors.each do |elder|
-        if elder.instance_variable_defined?("@attributes")
-          keys << elder.instance_variable_get("@attributes")
-        end
-      end
-      keys << @attributes unless @attributes.nil?
-      keys.flatten.uniq
-    end
-
-    def attributes
-      self.inject({}) {|hash, (k, v)| hash[k] = v if attributes_keys.include?(k.to_sym); hash}
+      @defaults.freeze
     end
 
     def dirty_properties
@@ -163,37 +68,101 @@ module SimpleCrowd
     end
 
     def dirty_attributes
-      dirty_properties & attributes_keys
+      dirty_properties & self.class.attributes
     end
 
-    def dirty? prop = nil
+    def dirty?(prop=nil)
       prop.nil? ? !@dirty_properties.empty? : @dirty_properties.include?(prop)
     end
 
     def clean
-      @dirty_properties = Array.new
+      @dirty_properties.clear
     end
 
-    def update_with attrs
-      current_keys = attributes_keys
-      attrs.each_pair {|k, v| self.send(:"#{k}=", v) if current_keys.include?(k.to_sym) && v != self.send(k.to_sym)}
+    def [](key)
+      respond_to?(:"#{key}") ? send(:"#{key}") : nil
     end
 
-    def []= key, val
-      prop = self.class.property_by_name key
-      (@attributes ||= []) << key if prop.nil?
-      super
+    def to_hash
+      (self.class.properties || []).inject({}) do |hash, key|
+        hash[key] = send(key) if respond_to?(key)
+        hash
+      end
     end
 
-    private
-    def self.real_key_for att
-      p = property_by_name att
-      p.nil? ? att : p.name
+    def inspect
+      ret = "#<#{self.class.to_s}"
+      self.class.properties.each do |key|
+        ret << " #{key}=#{self.instance_variable_get("@#{key}").inspect}"
+      end
+      ret << ">"
+      ret
     end
-    def self.att_to_ruby att
-      att.to_s =~ /^[a-z]*([A-Z][^A-Z]*)*$/ ? att.to_s.underscore.to_sym : att.to_sym
+
+    def self.from_soap(data)
+      data = data.dup if data
+
+      # Merge attributes into the main hash
+      if data && data[:attributes] && data[:attributes][:soap_attribute]
+        attrs = {}
+        attrs = data[:attributes][:soap_attribute].inject({}) do |hash, attr|
+          hash[attr[:name]] = attr[:values][:string]
+          hash
+        end
+        data.delete :attributes
+        data.merge! attrs
+      end
+
+      # Clean soap values
+      data.each do |(key, val)|
+        if val.is_a?(Hash) && val[:"@xmlns"]
+          val.delete(:"@xmlns")
+          data[key] = nil if val.empty?
+        end
+      end
+
+      # Map soap values to property values
+      if @soap_to_property_map
+        data = data.inject({}) do |hash, (key, val)|
+          key = :"#{key}"
+          if @soap_to_property_map.has_key?(key)
+            hash[@soap_to_property_map[key]] = val
+          else
+            hash[key] = val
+          end
+          hash
+        end
+      end
+
+      self.new data
     end
-    def real_key_for att; self.class.real_key_for att; end
-    def att_to_ruby att; self.class.att_to_ruby att; end
+
+    def to_soap
+      properties = self.class.properties || []
+      attributes = self.class.attributes || []
+
+      data = {}
+      data[:attributes] = {:SOAPAttribute => []} unless attributes.empty?
+      properties.each do |prop|
+        key = self.class.soap_key_for(prop)
+        val = send(prop)
+
+        if attributes.include?(prop)
+          data[:attributes][:SOAPAttribute] << {:name => key, :values => {:string => val}}
+        else
+          data[key] = val
+        end
+      end
+
+      data
+    end
+
+    def self.soap_key_for(property_key)
+      property_key = :"#{property_key}"
+      if @property_to_soap_map && @property_to_soap_map.has_key?(property_key)
+        return @property_to_soap_map[property_key]
+      end
+      property_key
+    end
   end
 end
