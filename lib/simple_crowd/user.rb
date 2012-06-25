@@ -9,9 +9,9 @@ module SimpleCrowd
     property :description
 
     # Assumed available attributes (with soap aliases)
-    property :first_name, :attribute => true, :map_soap => :givenName
-    property :last_name, :attribute => true, :map_soap => :sn
-    property :display_name, :attribute => true, :map_soap => :displayName
-    property :email, :attribute => true, :map_soap => :mail
+    attribute :first_name, :map_soap => :givenName
+    attribute :last_name, :map_soap => :sn
+    attribute :display_name, :map_soap => :displayName
+    attribute :email, :map_soap => :mail
   end
 end

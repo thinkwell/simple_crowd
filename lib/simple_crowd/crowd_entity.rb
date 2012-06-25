@@ -40,15 +40,17 @@ module SimpleCrowd
         @property_to_soap_map[property_name] = v
       end
 
-      if opts[:attribute]
-        @attributes ||= []
-        @attributes << property_name
-      end
-
       if opts[:default]
         @defaults ||= {}
         @defaults[property_name] = opts[:default]
       end
+    end
+
+    def self.attribute(attr_name, opts={})
+      attr_name = attr_name.to_sym
+      @attributes ||= []
+      @attributes << attr_name
+      self.property(attr_name, opts)
     end
 
     def self.properties
