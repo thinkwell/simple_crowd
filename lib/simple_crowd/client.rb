@@ -282,10 +282,8 @@ module SimpleCrowd
         old_raise_errors = client.config.raise_errors
         client.config.raise_errors = true
         yield
-      rescue Savon::SOAP::Fault => fault
-        raise CrowdError.new(fault.to_s, fault)
-      rescue Savon::HTTP::Error => e
-        raise CrowdError.new(e.to_s)
+      rescue Savon::SOAP::Fault, Savon::HTTP::Error => e
+        raise CrowdError.new(e)
       ensure
         client.config.raise_errors = old_raise_errors
       end

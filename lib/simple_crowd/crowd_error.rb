@@ -4,17 +4,21 @@ module SimpleCrowd
     attr_reader :type
     attr_reader :original
 
-    def initialize(string, original)
-      super string
+    def initialize(original, message=nil)
       @original = original
 
       if original.is_a?(Savon::SOAP::Fault)
+        fault = original.to_hash[:fault] || {}
         @response = original.http
-        @type = original.to_hash[:fault][:detail].keys.first rescue nil
+        @type = fault[:detail].keys.first rescue :fault
+        message = fault[:faultstring] if message.blank?
       elsif original.is_a?(Savon::HTTP::Error)
         @response = original.http
         @type = :http
       end
+
+      message = original.to_s if message.blank?
+      super message
     end
 
     def type? type
