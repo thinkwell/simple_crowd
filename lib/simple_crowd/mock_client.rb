@@ -23,7 +23,7 @@ module SimpleCrowd
     end
 
     def authenticate_user name, password, factors = nil
-      (user = find_user_by_name(name)) && user.password && user.password == password ? new_user_token(name) : nil
+      (user = find_user_by_name(name)) && user.instance_variable_get('@password') && user.instance_variable_get('@password') == password ? new_user_token(name) : nil
     end
     def create_user_token name
       new_user_token(name) if find_user_by_name(name)
@@ -66,7 +66,7 @@ module SimpleCrowd
     end
     def add_user user, credential
       if user && user.username && !find_user_by_name(user.username)
-        user.password = credential
+        user.instance_variable_set('@password', credential)
         self.class.users << user
         user
       end
@@ -77,7 +77,7 @@ module SimpleCrowd
     end
     def update_user_credential name, credential, encrypted = false
       if user = find_user_by_name(name)
-        user.password = credential
+        user.instance_variable_set('@password', credential)
       end
     end
     def update_user_attribute user, name, value
