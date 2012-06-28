@@ -97,6 +97,14 @@ module SimpleCrowd
       respond_to?(:"#{key}") ? send(:"#{key}") : nil
     end
 
+    def valid?
+      errors.empty?
+    end
+
+    def errors
+      {}
+    end
+
     def to_hash
       (self.class.properties || []).inject({}) do |hash, key|
         hash[key] = send(key) if respond_to?(key)
