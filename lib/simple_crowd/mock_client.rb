@@ -54,6 +54,16 @@ module SimpleCrowd
     def search_users_by_email email
       users.select{|u| u.email =~ /#{email}/}
     end
+    def search_users criteria, limit=0, start=0
+      users = users()
+      criteria.each do |search_key, search_val|
+        users = users.select do |user|
+          val = user[:"#{search_key}"]
+          val && val.downcase.include?(search_val.downcase)
+        end
+      end
+      users
+    end
     def add_user user, credential
       if user && user.username && !find_user_by_name(user.username)
         user.password = credential
