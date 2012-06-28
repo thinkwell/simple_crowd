@@ -216,6 +216,8 @@ module SimpleCrowd
         key = SimpleCrowd::User.soap_key_for(a)
         self.update_user_attribute user.username, key, user.send(a)
       end
+      user.clean
+      user
     end
 
     def app_token

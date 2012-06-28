@@ -97,6 +97,7 @@ module SimpleCrowd
       attrs_to_update.each do |a|
         stored_user[a] = user.send(a)
       end
+      user.clean
     end
 
     def is_group_member? group, user
