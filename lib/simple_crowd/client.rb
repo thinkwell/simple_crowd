@@ -137,11 +137,27 @@ module SimpleCrowd
 
     # Partial email match
     def search_users_by_email email
-      search_users({'principal.email' => email})
+      search_users({'email' => email})
     end
 
-    def search_users restrictions
-      soap_restrictions = prepare_search_restrictions restrictions
+    # Search Crowd users using the given criteria.
+    #
+    # critieria should be a hash of SimpleCrowd::User properties or attributes.
+    # Not all properties are supported, see (https://developer.atlassian.com/display/CROWDDEV/Using+the+Search+API)
+    #
+    # NOTE: Atlassian Crowd contains a bug that ignores the limit and start
+    # parameters
+    #
+    # For example:
+    #   client.search_users(:email => 'foo', :display_name => 'bar')
+    def search_users criteria, limit=0, start=0
+      # Convert search criteria to Crowd search restrictions
+      restrictions = criteria.inject({}) do |h, (key, val)|
+        key = User.search_restriction_for(key).to_s
+        h[key] = val
+        h
+      end
+      soap_restrictions = add_soap_namespace(prepare_search_restrictions(restrictions, limit, start))
       users = simple_soap_call :search_principals, soap_restrictions rescue []
       return [] if users.nil? || users[:soap_principal].nil?
       users = users[:soap_principal].is_a?(Array) ? users[:soap_principal] : [users[:soap_principal]]
@@ -324,10 +340,13 @@ module SimpleCrowd
       }
     end
 
-    def prepare_search_restrictions restrictions
-      {'int:searchRestriction' =>
-          restrictions.inject([]) {|arr, restrict| arr << {'int:name' => restrict[0], 'int:value' => restrict[1]}}
-      }
+    def prepare_search_restrictions restrictions, limit=0, start=0
+      restrictions = restrictions.inject([]) do |arr, (key, val)|
+        arr << {'name' => key, 'value' => val}
+      end
+      restrictions << {'name' => 'search.max.results', 'value' => limit.to_i} if limit.to_i > 0
+      restrictions << {'name' => 'search.index.start', 'value' => start.to_i} if start.to_i > 0
+      {'searchRestriction' => restrictions}
     end
 
     def hash_authenticated_token name = @options[:app_name], token = nil

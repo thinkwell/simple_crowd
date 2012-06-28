@@ -40,6 +40,11 @@ module SimpleCrowd
         @property_to_soap_map[property_name] = v
       end
 
+      if opts[:search_restriction]
+        @property_to_search_restriction_map ||= {}
+        @property_to_search_restriction_map[property_name] = opts[:search_restriction]
+      end
+
       if opts[:default]
         @defaults ||= {}
         @defaults[property_name] = opts[:default]
@@ -163,6 +168,14 @@ module SimpleCrowd
       property_key = :"#{property_key}"
       if @property_to_soap_map && @property_to_soap_map.has_key?(property_key)
         return @property_to_soap_map[property_key]
+      end
+      property_key
+    end
+
+    def self.search_restriction_for(property_key)
+      property_key = :"#{property_key}"
+      if @property_to_search_restriction_map && @property_to_search_restriction_map.has_key?(property_key)
+        return @property_to_search_restriction_map[property_key]
       end
       property_key
     end
