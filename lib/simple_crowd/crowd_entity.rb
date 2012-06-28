@@ -82,6 +82,13 @@ module SimpleCrowd
       prop.nil? ? !@dirty_properties.empty? : @dirty_properties.include?(prop)
     end
 
+    def update(properties_and_attributes)
+      return unless properties_and_attributes
+      properties_and_attributes.each do |key, val|
+        send(:"#{key.to_s}=", val) if self.respond_to?("#{key.to_s}=")
+      end
+    end
+
     def clean
       @dirty_properties.clear
     end
