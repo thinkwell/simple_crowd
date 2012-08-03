@@ -366,12 +366,12 @@ module SimpleCrowd
       if enum.is_a?(Hash)
         enum.inject({}) do |h, (k, v)|
           k = k == :string ? "wsdl:#{k}" : "int:#{k}"
-          h[k] = v.is_a?(Enumerable) ? add_soap_namespace(v) : v
+          h[k] = (v.is_a?(Enumerable) && !v.is_a?(String)) ? add_soap_namespace(v) : v
           h
         end
       else
         enum.map do |v|
-          v.is_a?(Enumerable) ? add_soap_namespace(v) : v
+          (v.is_a?(Enumerable) && !v.is_a?(String)) ? add_soap_namespace(v) : v
         end
       end
     end
