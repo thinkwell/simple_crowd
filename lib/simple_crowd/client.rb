@@ -132,7 +132,7 @@ module SimpleCrowd
 
     # Exact email match
     def find_user_by_email email
-      search_users_by_email(email).find{|u| u.email == email}
+      search_users_by_email(email).find{|u| u.email.casecmp(email) == 0}
     end
 
     # Partial email match
