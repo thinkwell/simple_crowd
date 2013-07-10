@@ -95,7 +95,7 @@ module SimpleCrowd
       return if stored_user.blank?
 
       attrs_to_update.each do |a|
-        stored_user[a] = user.send(a)
+        stored_user.update({a => user.send(a)})
       end
       user.clean
     end
