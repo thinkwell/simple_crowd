@@ -67,6 +67,7 @@ module SimpleCrowd
     def add_user user, credential
       if user && user.username && !find_user_by_name(user.username)
         user.instance_variable_set('@password', credential)
+        user.instance_variable_set('@email', user.username)
         self.class.users << user
         user
       end
