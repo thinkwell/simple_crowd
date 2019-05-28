@@ -11,6 +11,7 @@ module SimpleCrowd
     # Assumed available attributes (with soap aliases)
     attribute :first_name, :map_soap => :givenName
     attribute :last_name, :map_soap => :sn
+    attribute :student_id, :map_soap => :student_id
     attribute :display_name, :map_soap => :displayName, :search_restriction => 'principal.fullname'
     attribute :email, :map_soap => :mail, :search_restriction => 'principal.email'
 
