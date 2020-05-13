@@ -52,5 +52,8 @@ module SimpleCrowd
     def find_all_group_names
       []
     end
+    def find_group_memberships user
+      []
+    end
   end
 end

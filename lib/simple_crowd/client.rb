@@ -5,7 +5,12 @@ module SimpleCrowd
     attr_accessor :app_token, :cache_store
 
     def Client.new(options = {})
-      options[:disabled] ? SimpleCrowd::ClientNoop.new : super
+      if options[:noop]
+        Rails.logger.warn "CROWD :: NOOP"
+        SimpleCrowd::ClientNoop.new
+      else
+        super(options)
+      end
     end
 
     def initialize options = {}

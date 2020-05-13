@@ -15,6 +15,15 @@ module SimpleCrowd
     @tokens = []
     @groups = []
 
+    def MockClient.new(options = {})
+      if options[:noop]
+        Rails.logger.warn "CROWD :: NOOP"
+        SimpleCrowd::ClientNoop.new
+      else
+        super()
+      end
+    end
+
     def get_cookie_info
       {:secure=>false, :domain=>".twcrowdtest.com"}
     end

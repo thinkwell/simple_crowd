@@ -6,6 +6,7 @@ require 'simple_crowd/crowd_error'
 require 'simple_crowd/user'
 require 'simple_crowd/group'
 require 'simple_crowd/client'
+require 'simple_crowd/client_noop'
 require 'simple_crowd/cache/null_store'
 Dir['simple_crowd/mappers/*.rb'].each {|file| require File.basename(file, File.extname(file)) }
 
