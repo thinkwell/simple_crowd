@@ -4,6 +4,10 @@ module SimpleCrowd
     attr_reader :options
     attr_accessor :app_token, :cache_store
 
+    def Client.new(options = {})
+      options[:disabled] ? SimpleCrowd::ClientNoop.new : super
+    end
+
     def initialize options = {}
       @options = SimpleCrowd.options options
       yield(@options) if block_given?
