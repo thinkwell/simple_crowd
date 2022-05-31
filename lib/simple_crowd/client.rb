@@ -137,10 +137,8 @@ module SimpleCrowd
 
     # Partial email match
     def search_users_by_email email
-      # yolk#201 : in order to avoid high memory consumption as crowd will do partial match on email
-      if !email || email.length < 5
-        raise ArgumentError.new("Email must be at least 5 characters")
-      end
+      # yolk#201 : if email too short return [] in order to avoid high memory consumption as crowd will do partial match on email
+      return [] if !email || email.length < 4
       search_users({'email' => email})
     end
 
