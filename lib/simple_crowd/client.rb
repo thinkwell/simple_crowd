@@ -137,8 +137,6 @@ module SimpleCrowd
 
     # Partial email match
     def search_users_by_email email
-      # yolk#201 : if email too short return [] in order to avoid high memory consumption as crowd will do partial match on email
-      return [] if !email || email.length < 4
       search_users({'email' => email})
     end
 
@@ -153,6 +151,8 @@ module SimpleCrowd
     # For example:
     #   client.search_users(:email => 'foo', :display_name => 'bar')
     def search_users criteria, limit=0, start=0
+      # yolk#201 : if email too short return [] in order to avoid high memory consumption as crowd will do partial match on email
+      return [] if criteria && criteria.stringify_keys.keys == ['email'] && criteria.stringify_keys['email'].length < 4
       # Convert search criteria to Crowd search restrictions
       restrictions = criteria.inject({}) do |h, (key, val)|
         key = User.search_restriction_for(key).to_s
