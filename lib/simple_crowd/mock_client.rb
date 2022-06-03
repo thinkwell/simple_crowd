@@ -82,7 +82,7 @@ module SimpleCrowd
     end
     def update_user_attribute user, name, value
       if user = find_user_by_name(user)
-        user[name] = value
+        user.instance_variable_set("@#{name}", value)
       end
     end
     def update_user user
