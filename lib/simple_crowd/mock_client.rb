@@ -58,12 +58,14 @@ module SimpleCrowd
       (user = find_user_by_token(token)) && user.username
     end
     def find_user_by_email email
-      users.detect{|u| u.email == email}
+      search_users_by_email(email).detect{|u| u.email == email}
     end
     def search_users_by_email email
-      users.select{|u| u.email =~ /#{email}/}
+      search_users({'email' => email})
     end
     def search_users criteria, limit=0, start=0
+      # yolk#201 : if email too short return [] in order to avoid high memory consumption as crowd will do partial match on email
+      return [] if criteria && criteria.stringify_keys.keys == ['email'] && criteria.stringify_keys['email'].length < 4
       users = users()
       criteria.each do |search_key, search_val|
         users = users.select do |user|
@@ -91,7 +93,7 @@ module SimpleCrowd
     end
     def update_user_attribute user, name, value
       if user = find_user_by_name(user)
-        user[name] = value
+        user.instance_variable_set("@#{name}", value)
       end
     end
     def update_user user
