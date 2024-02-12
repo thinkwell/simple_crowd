@@ -43,7 +43,7 @@ module SimpleCrowd
     end
     def config_file_options
       @config_file_options ||= begin
-        (File.exists?('config/crowd.yml') &&
+        (File.exist?('config/crowd.yml') &&
             yml = (YAML.load_file('config/crowd.yml')[ENV["RAILS_ENV"] || "development"] || {}) and
             yml.symbolize_keys!) || {}
       end
