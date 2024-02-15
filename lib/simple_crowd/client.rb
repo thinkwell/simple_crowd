@@ -170,7 +170,7 @@ module SimpleCrowd
       end
       soap_restrictions = add_soap_namespace(prepare_search_restrictions(restrictions, limit, start))
       users = simple_soap_call :search_principals, soap_restrictions rescue []
-      return [] if users.nil? || users[:soap_principal].nil?
+      return [] if users.nil? || users.empty? || users[:soap_principal].nil?
       users = users[:soap_principal].is_a?(Array) ? users[:soap_principal] : [users[:soap_principal]]
       users.map{|u| SimpleCrowd::User.from_soap u}
     end
